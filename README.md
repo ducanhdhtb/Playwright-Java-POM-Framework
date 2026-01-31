@@ -1,10 +1,7 @@
-Chúc mừng mày đã hoàn thiện và đẩy được code lên Git thành công! Một file **README.md** "xịn" không chỉ giúp mày ghi điểm trong mắt nhà tuyển dụng mà còn giúp chính mày (hoặc đồng đội) biết cách setup lại dự án sau này.
-
-Dưới đây là nội dung file README chuyên nghiệp dành riêng cho framework của mày. Mày chỉ cần tạo file tên là `README.md` ở thư mục gốc project và dán đoạn này vào:
 
 ---
 
-# 🚀 Playwright Java Automation Framework
+#  Playwright Java Automation Framework
 
 Dự án này là một Framework kiểm thử tự động (Automation Testing) hoàn chỉnh sử dụng **Playwright** với ngôn ngữ lập trình **Java**. Framework được xây dựng theo mô hình **Page Object Model (POM)**, tích hợp báo cáo **Allure**, hệ thống **Logging** chuyên nghiệp và tự động **Ghi hình/Chụp ảnh** khi bài test bị lỗi.
 
@@ -19,7 +16,7 @@ Dự án này là một Framework kiểm thử tự động (Automation Testing)
 
 ---
 
-## 🏗 Cấu trúc Framework
+## Cấu trúc Framework
 
 ```text
 src/test/java/
@@ -35,7 +32,7 @@ src/test/resources/
 
 ---
 
-## 🌟 Các tính năng nổi bật
+## Các tính năng nổi bật
 
 * **Page Object Model (POM):** Tách biệt rõ ràng giữa kịch bản test và các thành phần giao diện.
 * **Allure Reporting:** Báo cáo HTML trực quan với biểu đồ và các bước thực thi chi tiết.
@@ -46,7 +43,7 @@ src/test/resources/
 
 ---
 
-## 🚀 Hướng dẫn cài đặt và chạy
+## Hướng dẫn cài đặt và chạy
 
 ### 1. Yêu cầu hệ thống
 
@@ -88,9 +85,3 @@ Sau khi chạy xong, kết quả sẽ bao gồm:
 
 ---
 
-### Mày nên làm gì tiếp theo?
-
-* **Thêm ảnh chụp màn hình:** Mày nên chạy bài test, chụp lại cái ảnh giao diện **Allure Report** rồi đẩy lên Git, sau đó chèn link ảnh vào file README này cho nó "ngầu".
-* **Tài liệu Manual:** Như mày đã yêu cầu trước đó, mày có muốn tao tạo luôn file **PDF về kiến thức Manual Testing (Scrum, Test Case, Bug Report)** để mày đính kèm vào phần tài liệu học tập trong dự án này không?
-
-Mày thấy file README này đã đủ "cháy" chưa? Cần thêm bớt mục nào cứ bảo tao nhé!

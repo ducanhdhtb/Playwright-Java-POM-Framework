@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Playwright Automation Practice – Locators & Actions</title>
+    <style>
+        :root{
+            --bg:#0b1220; --panel:#0f1a2b; --muted:#9fb1d1; --text:#eaf0ff;
+            --brand:#6aa6ff; --ok:#39d98a; --warn:#ffd166; --bad:#ff5c7a;
+            --border:rgba(255,255,255,.12);
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            background: radial-gradient(1200px 700px at 20% 10%, #13274a 0%, var(--bg) 55%, #070b14 100%);
+            color:var(--text);
+        }
+        header{
+            padding:24px 18px; border-bottom:1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+        }
+        header h1{margin:0 0 6px; font-size:20px}
+        header p{margin:0; color:var(--muted); font-size:13px; line-height:1.4}
+        .wrap{max-width:1100px; margin:0 auto; padding:18px}
+        .grid{display:grid; grid-template-columns: 1fr 1fr; gap:14px}
+        @media (max-width: 980px){.grid{grid-template-columns:1fr}}
+        .card{
+            background: rgba(15,26,43,.9);
+            border:1px solid var(--border);
+            border-radius:14px;
+            padding:14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.35);
+        }
+        .card h2{margin:0 0 10px; font-size:15px}
+        .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+        .col{display:flex; flex-direction:column; gap:6px; min-width:220px}
+        label{font-size:12px; color:var(--muted)}
+        input, select, textarea, button{
+            background: rgba(255,255,255,.04);
+            border:1px solid var(--border);
+            color:var(--text);
+            border-radius:10px;
+            padding:10px 12px;
+            outline:none;
+        }
+        textarea{min-height:90px; resize:vertical}
+        input:focus, select:focus, textarea:focus{border-color: rgba(106,166,255,.7); box-shadow: 0 0 0 3px rgba(106,166,255,.18)}
+        button{cursor:pointer}
+        button.primary{background: rgba(106,166,255,.18); border-color: rgba(106,166,255,.4)}
+        button.danger{background: rgba(255,92,122,.14); border-color: rgba(255,92,122,.45)}
+        button.ghost{background: transparent}
+        .pill{
+            padding:3px 8px; border-radius:999px; font-size:12px;
+            border:1px solid var(--border); color:var(--muted)
+        }
+        .status{
+            font-size:12px; color:var(--muted);
+            border:1px dashed var(--border); border-radius:12px; padding:10px;
+        }
+        .status b{color:var(--text)}
+        .divider{height:1px; background:var(--border); margin:12px 0}
+        .tabs{display:flex; gap:8px; margin:6px 0 10px}
+        .tab{padding:8px 10px; border-radius:10px; border:1px solid var(--border); color:var(--muted)}
+        .tab[aria-selected="true"]{border-color: rgba(106,166,255,.7); color:var(--text); background: rgba(106,166,255,.12)}
+        .tabpanel{display:none}
+        .tabpanel.active{display:block}
+        .toast-wrap{position:fixed; right:14px; bottom:14px; display:flex; flex-direction:column; gap:8px; z-index:9999}
+        .toast{
+            width:min(380px, calc(100vw - 28px));
+            background: rgba(0,0,0,.55);
+            backdrop-filter: blur(10px);
+            border:1px solid var(--border);
+            border-radius:14px;
+            padding:10px 12px;
+            box-shadow: 0 10px 26px rgba(0,0,0,.45);
+            animation: pop .18s ease-out;
+            font-size:13px;
+        }
+        @keyframes pop{from{transform:translateY(8px); opacity:.4}to{transform:translateY(0); opacity:1}}
+        .badge{display:inline-flex; align-items:center; gap:6px}
+        .dot{width:8px; height:8px; border-radius:999px; background: var(--ok)}
+        .dot.warn{background: var(--warn)}
+        .dot.bad{background: var(--bad)}
+        dialog{
+            border:1px solid var(--border);
+            border-radius:16px;
+            background: rgba(15,26,43,.98);
+            color: var(--text);
+            padding: 0;
+            width: min(560px, 92vw);
+        }
+        dialog::backdrop{background: rgba(0,0,0,.55)}
+        .modal-head{padding:14px 14px 10px; border-bottom:1px solid var(--border)}
+        .modal-body{padding:14px}
+        .modal-foot{padding:12px 14px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px}
+        table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; border:1px solid var(--border)}
+        th, td{padding:10px 10px; border-bottom:1px solid var(--border); font-size:13px}
+        th{background: rgba(255,255,255,.04); text-align:left; color:var(--muted)}
+        tr:last-child td{border-bottom:none}
+        .draggable{
+            width:120px; height:44px; display:flex; align-items:center; justify-content:center;
+            border-radius:12px; border:1px dashed rgba(106,166,255,.55);
+            background: rgba(106,166,255,.12);
+            user-select:none;
+        }
+        .dropzone{
+            min-height:90px; border-radius:12px; border:1px dashed var(--border);
+            display:flex; align-items:center; justify-content:center; color:var(--muted);
+            padding:10px;
+        }
+        .hover-box{
+            width:100%; min-height:70px; border-radius:12px;
+            border:1px solid var(--border); background: rgba(255,255,255,.03);
+            display:flex; align-items:center; justify-content:center;
+            transition: .12s ease;
+        }
+        .hover-box:hover{border-color: rgba(255,209,102,.7); box-shadow: 0 0 0 3px rgba(255,209,102,.12)}
+        .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+        .list{display:flex; flex-direction:column; gap:8px}
+        .item{
+            padding:10px; border:1px solid var(--border); border-radius:12px;
+            display:flex; align-items:center; justify-content:space-between; gap:10px;
+            background: rgba(255,255,255,.03);
+        }
+        .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size:12px; padding:1px 6px; border:1px solid var(--border); border-radius:6px; color:var(--muted)}
+        .hint{font-size:12px; color:var(--muted); line-height:1.4}
+        .mini{font-size:12px; color:var(--muted)}
+        .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="wrap">
+        <h1 id="page-title">Playwright Automation Practice</h1>
+        <p>
+            Trang luyện <span class="pill">locators</span> & <span class="pill">actions</span> đầy đủ:
+            id/class/data-testid/aria/role/text/nth + click/dblclick/rightclick/hover/fill/keyboard/select/upload/drag-drop/iframe/shadow/modal/toast/waits…
+        </p>
+    </div>
+</header>
+
+<main class="wrap">
+    <div class="grid">
+
+        <!-- 1) BASIC LOCATORS + ACTIONS -->
+        <section class="card" id="card-basic">
+            <h2>1) Basic Locators + Click Actions</h2>
+            <div class="row">
+                <button id="btn-click" data-testid="btn-click" class="primary">Click me</button>
+                <button id="btn-dblclick" data-testid="btn-dblclick">Double click</button>
+                <button id="btn-rightclick" data-testid="btn-rightclick" class="ghost">Right click</button>
+                <button id="btn-hover" data-testid="btn-hover" aria-label="Hover button">Hover target</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="hover-box" id="hover-area" data-testid="hover-area" aria-label="Hover Area">
+                Hover vào đây để đổi text
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="status" data-testid="basic-status">
+                Status: <b id="basic-status-text">idle</b>
+                <span class="mini">| counter: <b id="click-counter">0</b></span>
+            </div>
+
+            <p class="hint">
+                Gợi ý locator: <span class="kbd">#btn-click</span>,
+                <span class="kbd">[data-testid="btn-dblclick"]</span>,
+                <span class="kbd">getByRole('button', { name: 'Click me' })</span>,
+                <span class="kbd">getByLabel('Hover button')</span>.
+            </p>
+        </section>
+
+        <!-- 2) FORMS -->
+        <section class="card" id="card-forms">
+            <h2>2) Form Inputs (fill/clear/keyboard)</h2>
+            <div class="row">
+                <div class="col">
+                    <label for="inp-email">Email (type + clear)</label>
+                    <input id="inp-email" data-testid="inp-email" type="email" placeholder="you@example.com" autocomplete="off" />
+                </div>
+                <div class="col">
+                    <label for="inp-password">Password (mask)</label>
+                    <input id="inp-password" data-testid="inp-password" type="password" placeholder="••••••••" />
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+                <div class="col" style="min-width:260px">
+                    <label for="txt-notes">Textarea</label>
+                    <textarea id="txt-notes" data-testid="txt-notes" placeholder="Gõ vài dòng…"></textarea>
+                </div>
+                <div class="col">
+                    <label for="inp-date">Date</label>
+                    <input id="inp-date" data-testid="inp-date" type="date" />
+                    <label for="inp-range">Range</label>
+                    <input id="inp-range" data-testid="inp-range" type="range" min="0" max="100" value="30" />
+                    <div class="mini">Range value: <b id="range-val">30</b></div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <button id="btn-submit-form" data-testid="btn-submit-form" class="primary">Submit</button>
+                <button id="btn-reset-form" data-testid="btn-reset-form">Reset</button>
+                <span class="pill" id="form-result" data-testid="form-result">No submit yet</span>
+            </div>
+
+            <p class="hint">
+                Luyện: <span class="kbd">fill()</span>, <span class="kbd">press('Tab')</span>,
+                <span class="kbd">clear()</span> (hoặc fill('')), <span class="kbd">type()</span>.
+            </p>
+        </section>
+
+        <!-- 3) CHECKBOX / RADIO / SELECT -->
+        <section class="card" id="card-choice">
+            <h2>3) Checkbox / Radio / Select (selectOption)</h2>
+
+            <div class="row">
+                <div class="col" style="min-width:260px">
+                    <label>Checkboxes</label>
+                    <div class="row" role="group" aria-label="checkbox-group" data-testid="checkbox-group">
+                        <label><input type="checkbox" id="cb-news" data-testid="cb-news" /> Newsletter</label>
+                        <label><input type="checkbox" id="cb-alerts" data-testid="cb-alerts" /> Alerts</label>
+                        <label><input type="checkbox" id="cb-updates" data-testid="cb-updates" /> Product updates</label>
+                    </div>
+                </div>
+
+                <div class="col" style="min-width:260px">
+                    <label>Radio</label>
+                    <div class="row" role="radiogroup" aria-label="plan" data-testid="radio-group">
+                        <label><input type="radio" name="plan" value="free" data-testid="rd-free" checked /> Free</label>
+                        <label><input type="radio" name="plan" value="pro" data-testid="rd-pro" /> Pro</label>
+                        <label><input type="radio" name="plan" value="team" data-testid="rd-team" /> Team</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col">
+                    <label for="sel-country">Single select</label>
+                    <select id="sel-country" data-testid="sel-country" aria-label="Country Select">
+                        <option value="">-- choose --</option>
+                        <option value="vn">Vietnam</option>
+                        <option value="th">Thailand</option>
+                        <option value="sg">Singapore</option>
+                        <option value="jp">Japan</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="sel-tags">Multi select</label>
+                    <select id="sel-tags" data-testid="sel-tags" multiple size="4" aria-label="Tags Select">
+                        <option value="smoke">Smoke</option>
+                        <option value="regression">Regression</option>
+                        <option value="api">API</option>
+                        <option value="ui">UI</option>
+                        <option value="perf">Performance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="status" data-testid="choice-status">
+                Selected: <b id="choice-status-text">none</b>
+            </div>
+
+            <p class="hint">
+                Luyện locator theo role/label: <span class="kbd">getByRole('combobox', { name: 'Country Select' })</span>,
+                <span class="kbd">getByRole('radiogroup', { name: 'plan' })</span>.
+            </p>
+        </section>
+
+        <!-- 4) DYNAMIC CONTENT + WAITS -->
+        <section class="card" id="card-dynamic">
+            <h2>4) Dynamic Content (waitForSelector / toHaveText)</h2>
+
+            <div class="row">
+                <button id="btn-load-slow" data-testid="btn-load-slow" class="primary">Load after 1.5s</button>
+                <button id="btn-toggle" data-testid="btn-toggle">Toggle visibility</button>
+                <button id="btn-enable" data-testid="btn-enable">Enable button after 1s</button>
+                <button id="btn-disabled" data-testid="btn-disabled" disabled>Disabled</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="status">
+                <div>Slow area: <b id="slow-status" data-testid="slow-status">empty</b></div>
+                <div>Toggle area: <b id="toggle-status" data-testid="toggle-status">hidden</b></div>
+            </div>
+
+            <div id="toggle-box" data-testid="toggle-box" style="display:none; margin-top:10px" class="item">
+                <span>👀 I appear/disappear</span>
+                <button id="btn-remove-me" data-testid="btn-remove-me" class="danger">Remove me</button>
+            </div>
+
+            <p class="hint">
+                Luyện: chờ <span class="kbd">attached/visible/hidden/detached</span>, chờ enabled, chờ text thay đổi.
+            </p>
+        </section>
+
+        <!-- 5) DIALOGS + MODAL -->
+        <section class="card" id="card-dialogs">
+            <h2>5) Dialogs (alert/confirm/prompt) + Modal</h2>
+
+            <div class="row">
+                <button id="btn-alert" data-testid="btn-alert">Alert</button>
+                <button id="btn-confirm" data-testid="btn-confirm">Confirm</button>
+                <button id="btn-prompt" data-testid="btn-prompt">Prompt</button>
+                <button id="btn-open-modal" data-testid="btn-open-modal" class="primary">Open modal</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="status">
+                Dialog result: <b id="dialog-result" data-testid="dialog-result">none</b>
+            </div>
+
+            <dialog id="app-modal" data-testid="app-modal" aria-label="App Modal">
+                <div class="modal-head">
+                    <div class="badge"><span class="dot warn"></span><b id="modal-title">Demo Modal</b></div>
+                    <div class="mini">Test: close via button / ESC / click outside (tuỳ browser)</div>
+                </div>
+                <div class="modal-body">
+                    <label for="modal-input">Modal input</label>
+                    <input id="modal-input" data-testid="modal-input" placeholder="type inside modal…" />
+                    <div class="divider"></div>
+                    <div class="row">
+                        <button id="modal-make-toast" data-testid="modal-make-toast">Toast from modal</button>
+                        <button id="modal-change-title" data-testid="modal-change-title">Change modal title</button>
+                    </div>
+                </div>
+                <div class="modal-foot">
+                    <button id="modal-cancel" data-testid="modal-cancel">Cancel</button>
+                    <button id="modal-ok" data-testid="modal-ok" class="primary">OK</button>
+                </div>
+            </dialog>
+
+            <p class="hint">
+                Playwright: <span class="kbd">page.on('dialog', d =&gt; d.accept())</span>,
+                modal: <span class="kbd">locator('dialog[open]')</span> + <span class="kbd">press('Escape')</span>.
+            </p>
+        </section>
+
+        <!-- 6) TABLE + FILTER -->
+        <section class="card" id="card-table">
+            <h2>6) Table (row/cell locators) + Filter</h2>
+            <div class="row">
+                <div class="col">
+                    <label for="inp-filter">Filter by name</label>
+                    <input id="inp-filter" data-testid="inp-filter" placeholder="type e.g. Anna" />
+                </div>
+                <button id="btn-apply-filter" data-testid="btn-apply-filter" class="primary">Apply</button>
+                <button id="btn-reset-filter" data-testid="btn-reset-filter">Reset</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <table data-testid="user-table" aria-label="User Table">
+                <thead>
+                <tr>
+                    <th>#</th><th>Name</th><th>Role</th><th>Status</th><th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="user-tbody">
+                <!-- JS renders -->
+                </tbody>
+            </table>
+
+            <p class="hint">
+                Luyện: locate theo row chứa text, click nút trong row, assert cell text, dùng <span class="kbd">nth()</span>.
+            </p>
+        </section>
+
+        <!-- 7) DRAG & DROP + FILE UPLOAD -->
+        <section class="card" id="card-dnd-upload">
+            <h2>7) Drag & Drop + File Upload</h2>
+
+            <div class="row">
+                <div class="draggable" id="drag-source" data-testid="drag-source" draggable="true" aria-label="Drag Source">
+                    Drag me
+                </div>
+                <div class="dropzone" id="drop-zone" data-testid="drop-zone" aria-label="Drop Zone">
+                    Drop here
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col" style="min-width:320px">
+                    <label for="file-input">File input (setInputFiles)</label>
+                    <input id="file-input" data-testid="file-input" type="file" />
+                    <div class="mini">Selected: <b id="file-name" data-testid="file-name">none</b></div>
+                </div>
+
+                <div class="col" style="min-width:220px">
+                    <label class="sr-only" for="btn-fake-upload">Fake upload</label>
+                    <button id="btn-fake-upload" data-testid="btn-fake-upload">Simulate upload (1.2s)</button>
+                    <progress id="upload-progress" data-testid="upload-progress" value="0" max="100" style="width:100%"></progress>
+                    <div class="mini">Upload state: <b id="upload-state" data-testid="upload-state">idle</b></div>
+                </div>
+            </div>
+
+            <p class="hint">
+                DragDrop: <span class="kbd">locator.dragTo()</span>. Upload: <span class="kbd">setInputFiles()</span>.
+            </p>
+        </section>
+
+        <!-- 8) TABS + LIST DYNAMIC -->
+        <section class="card" id="card-tabs-list">
+            <h2>8) Tabs + Dynamic List (add/remove, nth)</h2>
+
+            <div class="tabs" role="tablist" aria-label="Demo Tabs" data-testid="tablist">
+                <button class="tab" role="tab" aria-selected="true" aria-controls="panel-a" id="tab-a" data-testid="tab-a">Tab A</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="panel-b" id="tab-b" data-testid="tab-b">Tab B</button>
+                <button class="tab" role="tab" aria-selected="false" aria-controls="panel-c" id="tab-c" data-testid="tab-c">Tab C</button>
+            </div>
+
+            <div id="panel-a" class="tabpanel active" role="tabpanel" aria-labelledby="tab-a" data-testid="panel-a">
+                <div class="row">
+                    <button id="btn-add-item" data-testid="btn-add-item" class="primary">Add item</button>
+                    <button id="btn-add-5" data-testid="btn-add-5">Add 5 items</button>
+                    <button id="btn-clear-items" data-testid="btn-clear-items" class="danger">Clear</button>
+                    <span class="mini">Count: <b id="item-count" data-testid="item-count">0</b></span>
+                </div>
+                <div class="divider"></div>
+                <div class="list" id="items" data-testid="items"></div>
+            </div>
+
+            <div id="panel-b" class="tabpanel" role="tabpanel" aria-labelledby="tab-b" data-testid="panel-b">
+                <div class="status">
+                    Panel B content: <b data-testid="panel-b-text">You switched to Tab B</b>
+                </div>
+            </div>
+
+            <div id="panel-c" class="tabpanel" role="tabpanel" aria-labelledby="tab-c" data-testid="panel-c">
+                <div class="row">
+                    <label for="ce-box" class="mini">Contenteditable (simulate typing)</label>
+                </div>
+                <div id="ce-box" data-testid="ce-box" contenteditable="true"
+                     style="min-height:90px; padding:10px; border:1px solid var(--border); border-radius:12px; background: rgba(255,255,255,.03)">
+                    Click & type here…
+                </div>
+                <div class="mini">Length: <b id="ce-len" data-testid="ce-len">0</b></div>
+            </div>
+
+            <p class="hint">
+                Luyện: tab role, aria-selected, panel visible, list item nth, remove item theo text.
+            </p>
+        </section>
+
+        <!-- 9) IFRAME -->
+        <section class="card" id="card-iframe">
+            <h2>9) iFrame (frameLocator)</h2>
+            <div class="mini">Bên dưới là iframe dùng <span class="kbd">srcdoc</span>, có button + input bên trong.</div>
+            <div class="divider"></div>
+
+            <iframe
+                    id="demo-iframe"
+                    data-testid="demo-iframe"
+                    title="Demo Iframe"
+                    style="width:100%; height:220px; border:1px solid var(--border); border-radius:12px; background:#0b1220"
+                    srcdoc='
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8"/>
+              <style>
+                body{font-family:system-ui;margin:0;padding:12px;background:#0b1220;color:#eaf0ff}
+                input,button{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#eaf0ff;outline:none}
+                .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+                .status{margin-top:10px;padding:10px;border:1px dashed rgba(255,255,255,.12);border-radius:12px;color:#9fb1d1}
+                b{color:#eaf0ff}
+              </style>
+            </head>
+            <body>
+              <div class="row">
+                <input id="if-inp" data-testid="if-inp" aria-label="Iframe Input" placeholder="type in iframe..." />
+                <button id="if-btn" data-testid="if-btn">Iframe click</button>
+              </div>
+              <div class="status">Iframe status: <b id="if-status" data-testid="if-status">idle</b></div>
+              <script>
+                const s = document.getElementById("if-status");
+                document.getElementById("if-btn").addEventListener("click", () => {
+                  s.textContent = "clicked@" + new Date().toLocaleTimeString();
+                });
+              </script>
+            </body>
+          </html>
+        '>
+            </iframe>
+
+            <p class="hint">
+                Luyện: <span class="kbd">page.frameLocator('#demo-iframe').getByTestId('if-btn')</span>.
+            </p>
+        </section>
+
+        <!-- 10) SHADOW DOM -->
+        <section class="card" id="card-shadow">
+            <h2>10) Shadow DOM (piercing / locators)</h2>
+            <div class="mini">Component dưới attachShadow({mode:"open"}) với input + button bên trong.</div>
+            <div class="divider"></div>
+
+            <div id="shadow-host" data-testid="shadow-host" aria-label="Shadow Host"></div>
+
+            <div class="divider"></div>
+
+            <div class="status">
+                Shadow status: <b id="shadow-status" data-testid="shadow-status">idle</b>
+            </div>
+
+            <p class="hint">
+                Luyện: <span class="kbd">locator('#shadow-host').locator('input')</span> hoặc dùng text/role trong shadow.
+            </p>
+        </section>
+
+        <!-- 11) ATTRIBUTE CHANGES -->
+        <section class="card" id="card-attr">
+            <h2>11) Attribute / Class Changes (toHaveAttribute)</h2>
+            <div class="row">
+                <button id="btn-change-attr" data-testid="btn-change-attr" class="primary">Change attributes</button>
+                <button id="btn-reset-attr" data-testid="btn-reset-attr">Reset</button>
+                <a id="link-dynamic" data-testid="link-dynamic" href="#"
+                   class="pill" aria-label="Dynamic Link">dynamic-link</a>
+            </div>
+            <div class="divider"></div>
+            <div class="status">
+                href: <b id="attr-href" data-testid="attr-href">#</b> |
+                class: <b id="attr-class" data-testid="attr-class">pill</b> |
+                data-state: <b id="attr-state" data-testid="attr-state">off</b>
+            </div>
+            <p class="hint">
+                Luyện: chờ attribute đổi, class đổi, assert <span class="kbd">toHaveAttribute()</span>.
+            </p>
+        </section>
+
+        <!-- 12) NAVIGATION (hash) + NEW WINDOW -->
+        <section class="card" id="card-nav">
+            <h2>12) Navigation (hash) + Open new tab</h2>
+            <div class="row">
+                <button id="btn-go-section" data-testid="btn-go-section" class="primary">Go to #card-table</button>
+                <a id="link-hash" data-testid="link-hash" href="#card-forms" class="pill" aria-label="Go Forms">#card-forms</a>
+                <button id="btn-newtab" data-testid="btn-newtab">Open new tab</button>
+            </div>
+            <div class="divider"></div>
+            <div class="status">
+                Current hash: <b id="hash-now" data-testid="hash-now">(none)</b>
+            </div>
+            <p class="hint">
+                Luyện: <span class="kbd">page.waitForURL()</span>, bắt popup: <span class="kbd">page.waitForEvent('popup')</span>.
+            </p>
+        </section>
+
+    </div>
+</main>
+
+<div class="toast-wrap" id="toast-wrap" aria-live="polite" aria-label="Toasts" data-testid="toast-wrap"></div>
+
+<script>
+    // ---------- Helpers ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function toast(msg, kind="ok"){
+        const wrap = $("#toast-wrap");
+        const t = document.createElement("div");
+        t.className = "toast";
+        const dotClass = kind === "ok" ? "dot" : kind === "warn" ? "dot warn" : "dot bad";
+        t.innerHTML = `<div class="badge"><span class="${dotClass}"></span><b style="margin-right:6px">${kind.toUpperCase()}</b><span>${msg}</span></div>`;
+        wrap.appendChild(t);
+        setTimeout(()=>{ t.remove(); }, 2600);
+    }
+
+    // ---------- 1) Basic click actions ----------
+    let clicks = 0;
+    $("#btn-click").addEventListener("click", () => {
+        clicks++;
+        $("#click-counter").textContent = String(clicks);
+        $("#basic-status-text").textContent = "clicked";
+        toast("Clicked button", "ok");
+    });
+
+    $("#btn-dblclick").addEventListener("dblclick", () => {
+        $("#basic-status-text").textContent = "double-clicked";
+        toast("Double clicked", "warn");
+    });
+
+    $("#btn-rightclick").addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        $("#basic-status-text").textContent = "right-clicked";
+        toast("Right click (contextmenu)", "warn");
+    });
+
+    $("#btn-hover").addEventListener("mouseenter", () => {
+        $("#basic-status-text").textContent = "hovered button";
+    });
+
+    $("#hover-area").addEventListener("mouseenter", () => {
+        $("#hover-area").textContent = "✅ Hover detected!";
+    });
+    $("#hover-area").addEventListener("mouseleave", () => {
+        $("#hover-area").textContent = "Hover vào đây để đổi text";
+    });
+
+    // ---------- 2) Form ----------
+    $("#inp-range").addEventListener("input", () => {
+        $("#range-val").textContent = $("#inp-range").value;
+    });
+
+    $("#btn-submit-form").addEventListener("click", () => {
+        const email = $("#inp-email").value.trim();
+        const notes = $("#txt-notes").value.trim();
+        const date = $("#inp-date").value;
+        $("#form-result").textContent = email ? `Submitted: ${email} | date=${date || "n/a"} | notesLen=${notes.length}` : "Submitted: (empty email)";
+        toast("Form submitted", "ok");
+    });
+
+    $("#btn-reset-form").addEventListener("click", () => {
+        $("#inp-email").value = "";
+        $("#inp-password").value = "";
+        $("#txt-notes").value = "";
+        $("#inp-date").value = "";
+        $("#inp-range").value = "30";
+        $("#range-val").textContent = "30";
+        $("#form-result").textContent = "No submit yet";
+        toast("Form reset", "warn");
+    });
+
+    // ---------- 3) Choice controls ----------
+    function updateChoiceStatus(){
+        const checks = ["cb-news","cb-alerts","cb-updates"].filter(id => $("#"+id).checked);
+        const plan = ($$('input[name="plan"]').find(r => r.checked) || {}).value || "none";
+        const country = $("#sel-country").value || "none";
+        const tags = $$("#sel-tags option").filter(o=>o.selected).map(o=>o.value);
+        $("#choice-status-text").textContent = `checks=[${checks.join(",")||"none"}], plan=${plan}, country=${country}, tags=[${tags.join(",")||"none"}]`;
+    }
+    ["cb-news","cb-alerts","cb-updates","rd-free","rd-pro","rd-team","sel-country","sel-tags"].forEach(id=>{
+        $("#"+id).addEventListener("change", updateChoiceStatus);
+    });
+    updateChoiceStatus();
+
+    // ---------- 4) Dynamic content ----------
+    $("#btn-load-slow").addEventListener("click", () => {
+        $("#slow-status").textContent = "loading...";
+        setTimeout(() => {
+            $("#slow-status").textContent = "loaded ✅";
+            toast("Slow content loaded", "ok");
+        }, 1500);
+    });
+
+    $("#btn-toggle").addEventListener("click", () => {
+        const box = $("#toggle-box");
+        const isHidden = getComputedStyle(box).display === "none";
+        box.style.display = isHidden ? "flex" : "none";
+        $("#toggle-status").textContent = isHidden ? "visible" : "hidden";
+    });
+
+    $("#btn-remove-me").addEventListener("click", () => {
+        $("#toggle-box").remove();
+        $("#toggle-status").textContent = "detached";
+        toast("Element removed (detached)", "warn");
+    });
+
+    $("#btn-enable").addEventListener("click", () => {
+        $("#btn-disabled").disabled = true;
+        $("#btn-disabled").textContent = "Disabled";
+        setTimeout(() => {
+            $("#btn-disabled").disabled = false;
+            $("#btn-disabled").textContent = "Enabled ✅";
+            toast("Button enabled", "ok");
+        }, 1000);
+    });
+
+    // ---------- 5) Dialogs + modal ----------
+    $("#btn-alert").addEventListener("click", () => alert("Hello from alert!"));
+    $("#btn-confirm").addEventListener("click", () => {
+        const ok = confirm("Do you confirm?");
+        $("#dialog-result").textContent = ok ? "confirm:OK" : "confirm:Cancel";
+    });
+    $("#btn-prompt").addEventListener("click", () => {
+        const v = prompt("Type something:", "playwright");
+        $("#dialog-result").textContent = v === null ? "prompt:Cancel" : `prompt:${v}`;
+    });
+
+    const modal = $("#app-modal");
+    $("#btn-open-modal").addEventListener("click", () => modal.showModal());
+    $("#modal-cancel").addEventListener("click", () => { modal.close("cancel"); $("#dialog-result").textContent = "modal:cancel"; });
+    $("#modal-ok").addEventListener("click", () => { modal.close("ok"); $("#dialog-result").textContent = "modal:ok"; toast("Modal OK", "ok"); });
+    $("#modal-make-toast").addEventListener("click", () => toast("Toast from modal!", "warn"));
+    $("#modal-change-title").addEventListener("click", () => {
+        $("#modal-title").textContent = "Modal title changed @" + new Date().toLocaleTimeString();
+    });
+
+    // ---------- 6) Table ----------
+    const users = [
+        {id:1, name:"Anna", role:"QA", status:"active"},
+        {id:2, name:"Binh", role:"Dev", status:"active"},
+        {id:3, name:"Chi", role:"PM", status:"inactive"},
+        {id:4, name:"Dara", role:"QA", status:"active"},
+        {id:5, name:"Ethan", role:"DevOps", status:"inactive"},
+    ];
+
+    function renderTable(list){
+        const tb = $("#user-tbody");
+        tb.innerHTML = "";
+        list.forEach(u=>{
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-testid", `row-${u.id}`);
+            tr.innerHTML = `
+        <td data-testid="cell-id">${u.id}</td>
+        <td data-testid="cell-name">${u.name}</td>
+        <td data-testid="cell-role">${u.role}</td>
+        <td data-testid="cell-status"><span class="pill">${u.status}</span></td>
+        <td>
+          <button data-testid="btn-row-action" aria-label="Action for ${u.name}">Action</button>
+        </td>
+      `;
+            tr.querySelector('[data-testid="btn-row-action"]').addEventListener("click", ()=>{
+                toast(`Row action: ${u.name}`, "ok");
+            });
+            tb.appendChild(tr);
+        });
+    }
+    renderTable(users);
+
+    $("#btn-apply-filter").addEventListener("click", ()=>{
+        const q = $("#inp-filter").value.trim().toLowerCase();
+        const filtered = q ? users.filter(u => u.name.toLowerCase().includes(q)) : users;
+        renderTable(filtered);
+        toast("Filter applied", "warn");
+    });
+    $("#btn-reset-filter").addEventListener("click", ()=>{
+        $("#inp-filter").value = "";
+        renderTable(users);
+        toast("Filter reset", "warn");
+    });
+
+    // ---------- 7) Drag & drop ----------
+    $("#drag-source").addEventListener("dragstart", (e)=>{
+        e.dataTransfer.setData("text/plain", "drag-source");
+        $("#drop-zone").textContent = "Dropping…";
+    });
+    $("#drop-zone").addEventListener("dragover", (e)=> e.preventDefault());
+    $("#drop-zone").addEventListener("drop", (e)=>{
+        e.preventDefault();
+        const data = e.dataTransfer.getData("text/plain");
+        $("#drop-zone").textContent = data === "drag-source" ? "✅ Dropped!" : "❓ Unknown drop";
+        toast("Drop event fired", "ok");
+    });
+
+    // ---------- File upload ----------
+    $("#file-input").addEventListener("change", ()=>{
+        const f = $("#file-input").files?.[0];
+        $("#file-name").textContent = f ? f.name : "none";
+    });
+
+    // Fake upload progress
+    $("#btn-fake-upload").addEventListener("click", ()=>{
+        $("#upload-state").textContent = "uploading...";
+        $("#upload-progress").value = 0;
+        let v = 0;
+        const t = setInterval(()=>{
+            v += 10;
+            $("#upload-progress").value = v;
+            if(v >= 100){
+                clearInterval(t);
+                $("#upload-state").textContent = "done ✅";
+                toast("Upload finished", "ok");
+            }
+        }, 120);
+    });
+
+    // ---------- 8) Tabs + list ----------
+    function setTab(id){
+        const tabs = ["a","b","c"];
+        tabs.forEach(k=>{
+            const tab = $("#tab-"+k);
+            const panel = $("#panel-"+k);
+            const active = k === id;
+            tab.setAttribute("aria-selected", active ? "true" : "false");
+            panel.classList.toggle("active", active);
+        });
+    }
+    ["a","b","c"].forEach(k => $("#tab-"+k).addEventListener("click", ()=> setTab(k)));
+
+    let itemId = 0;
+    function updateCount(){ $("#item-count").textContent = String($$("#items .item").length); }
+
+    function addItem(){
+        itemId++;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.setAttribute("data-testid", "list-item");
+        div.setAttribute("data-item-id", String(itemId));
+        div.innerHTML = `
+      <span><b data-testid="item-title">Item ${itemId}</b> <span class="mini">(data-item-id="${itemId}")</span></span>
+      <span class="row">
+        <button data-testid="btn-item-edit" aria-label="Edit Item ${itemId}">Edit</button>
+        <button data-testid="btn-item-delete" class="danger" aria-label="Delete Item ${itemId}">Delete</button>
+      </span>
+    `;
+        div.querySelector('[data-testid="btn-item-edit"]').addEventListener("click", ()=>{
+            toast(`Edit clicked: Item ${itemId}`, "warn");
+        });
+        div.querySelector('[data-testid="btn-item-delete"]').addEventListener("click", ()=>{
+            div.remove();
+            updateCount();
+            toast("Item deleted", "bad");
+        });
+        $("#items").appendChild(div);
+        updateCount();
+    }
+
+    $("#btn-add-item").addEventListener("click", addItem);
+    $("#btn-add-5").addEventListener("click", ()=>{ for(let i=0;i<5;i++) addItem(); });
+    $("#btn-clear-items").addEventListener("click", ()=>{
+        $("#items").innerHTML = "";
+        updateCount();
+        toast("List cleared", "bad");
+    });
+
+    // contenteditable length
+    $("#ce-box").addEventListener("input", ()=>{
+        $("#ce-len").textContent = String($("#ce-box").textContent.length);
+    });
+
+    // ---------- 10) Shadow DOM ----------
+    (function initShadow(){
+        const host = $("#shadow-host");
+        const shadow = host.attachShadow({mode:"open"});
+        shadow.innerHTML = `
+      <style>
+        .box{border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px; background: rgba(255,255,255,.03)}
+        label{font-size:12px; color:#9fb1d1}
+        input,button{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#eaf0ff;outline:none}
+        .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+        .mini{font-size:12px; color:#9fb1d1}
+      </style>
+      <div class="box" data-testid="shadow-box" aria-label="Shadow Box">
+        <div class="row">
+          <div style="display:flex; flex-direction:column; gap:6px; min-width:260px">
+            <label for="sh-inp">Shadow input</label>
+            <input id="sh-inp" data-testid="sh-inp" aria-label="Shadow Input" placeholder="type in shadow..." />
+          </div>
+          <button id="sh-btn" data-testid="sh-btn" aria-label="Shadow Button">Shadow click</button>
+        </div>
+        <div class="mini" style="margin-top:10px">Shadow output: <b id="sh-out" data-testid="sh-out">idle</b></div>
+      </div>
+    `;
+        shadow.getElementById("sh-btn").addEventListener("click", ()=>{
+            const val = shadow.getElementById("sh-inp").value;
+            shadow.getElementById("sh-out").textContent = val ? `typed="${val}"` : "clicked";
+            $("#shadow-status").textContent = "clicked";
+            toast("Shadow button clicked", "ok");
+        });
+    })();
+
+    // ---------- 11) Attribute changes ----------
+    $("#btn-change-attr").addEventListener("click", ()=>{
+        const link = $("#link-dynamic");
+        link.href = "#changed-" + Math.floor(Math.random()*1000);
+        link.classList.toggle("primary-link");
+        link.dataset.state = (link.dataset.state === "on") ? "off" : "on";
+        $("#attr-href").textContent = link.getAttribute("href");
+        $("#attr-class").textContent = link.getAttribute("class");
+        $("#attr-state").textContent = link.dataset.state;
+        toast("Attributes changed", "warn");
+    });
+
+    $("#btn-reset-attr").addEventListener("click", ()=>{
+        const link = $("#link-dynamic");
+        link.href = "#";
+        link.className = "pill";
+        link.dataset.state = "off";
+        $("#attr-href").textContent = "#";
+        $("#attr-class").textContent = "pill";
+        $("#attr-state").textContent = "off";
+        toast("Attributes reset", "warn");
+    });
+
+    // ---------- 12) Navigation / new tab ----------
+    function updateHash(){ $("#hash-now").textContent = location.hash || "(none)"; }
+    window.addEventListener("hashchange", updateHash);
+    updateHash();
+
+    $("#btn-go-section").addEventListener("click", ()=>{
+        location.hash = "#card-table";
+    });
+
+    $("#btn-newtab").addEventListener("click", ()=>{
+        const html = `
+      <!doctype html>
+      <html><head><meta charset="utf-8"/><title>Popup</title>
+      <style>
+        body{font-family:system-ui;padding:16px;background:#0b1220;color:#eaf0ff}
+        button{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#eaf0ff}
+      </style></head>
+      <body>
+        <h3 data-testid="popup-title">Popup page</h3>
+        <p data-testid="popup-text">Bạn có thể luyện waitForEvent("popup") và thao tác trong tab mới.</p>
+        <button data-testid="popup-btn" onclick="document.querySelector('[data-testid=popup-text]').textContent='Clicked in popup ✅'">Click in popup</button>
+      </body></html>
+    `;
+        const w = window.open("about:blank", "_blank", "noopener,noreferrer,width=520,height=420");
+        if(w){
+            w.document.open();
+            w.document.write(html);
+            w.document.close();
+        } else {
+            toast("Popup blocked by browser", "bad");
+        }
+    });
+</script>
+</body>
+</html>
