@@ -24,7 +24,7 @@ public class BaseTest {
 
     @BeforeMethod
     public void setup() {
-        log.info("Khởi tạo Playwright và Browser...");
+        log.info("Init Playwright và Browser...");
         playwright = Playwright.create();
 
         boolean isHeadless = Boolean.parseBoolean(ConfigReader.getProperty("headless"));
