@@ -1,4 +1,4 @@
-package automation_exercise;
+package automation_exercise.freecode;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
