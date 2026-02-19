@@ -1,14 +1,15 @@
-package automation_exercise;
+package automation_exercise.tests;
 
+import automation_exercise.BaseTest;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import org.testng.annotations.Test;
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 // Kế thừa từ BaseTest
-public class RegisterTestPOM extends BaseTest {
+public class TC1_RegisterUser extends BaseTest {
 
-    @Test
+    @Test(priority = 1)
     public void testRegisterUser() {
         // 1. Dùng homePage từ BaseTest
         homePage.navigate();
@@ -17,7 +18,8 @@ public class RegisterTestPOM extends BaseTest {
         // 2. Dùng signupLoginPage từ BaseTest
         String timestamp = String.valueOf(System.currentTimeMillis());
         String name = "Nguyễn Đức Anh";
-        signupLoginPage.fillSignupForm(name, "auto_test" + timestamp + "@example.com");
+//        signupLoginPage.fillSignupForm(name, "auto_test" + timestamp + "@example.com");
+        signupLoginPage.fillSignupForm(name, "ducanhdhtb"  + "@gmail.com");
         signupLoginPage.clickSignupButton();
 
         // 3. Dùng accountPage từ BaseTest
@@ -34,8 +36,8 @@ public class RegisterTestPOM extends BaseTest {
         assertThat(page.locator("#header")).containsText("Logged in as " + name);
 
         // Xóa tài khoản để sạch data
-        homePage.deleteAccount();
-        assertThat(page.getByText("Account Deleted!")).isVisible();
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
+//        homePage.deleteAccount();
+//        assertThat(page.getByText("Account Deleted!")).isVisible();
+//        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
     }
 }

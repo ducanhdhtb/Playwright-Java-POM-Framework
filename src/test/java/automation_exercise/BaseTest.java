@@ -4,6 +4,7 @@ import automation_exercise.pages.*;
 import com.microsoft.playwright.*;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
+
 import java.nio.file.Paths;
 
 public class BaseTest {
@@ -16,6 +17,19 @@ public class BaseTest {
     protected HomePage homePage;
     protected SignupLoginPage signupLoginPage;
     protected AccountInformationPage accountPage;
+
+    protected ProductsPage productsPage;
+    protected CartPage cartPage;
+    protected PaymentPage paymentPage;
+
+    protected ContactUsPage contactPage;
+
+    protected ProductDetailPage productDetailPage;
+
+    protected SignupLoginPage signupPage;
+
+
+    protected CheckoutPage checkoutPage;
 
     @BeforeClass
     public void setupBrowser() {
@@ -40,6 +54,16 @@ public class BaseTest {
         homePage = new HomePage(page);
         signupLoginPage = new SignupLoginPage(page);
         accountPage = new AccountInformationPage(page);
+
+        // THÊM MỚI Ở ĐÂY
+        productsPage = new ProductsPage(page);
+        cartPage = new CartPage(page);
+        paymentPage = new PaymentPage(page);
+        contactPage = new ContactUsPage(page);
+        productDetailPage = new ProductDetailPage(page);
+        signupPage = new SignupLoginPage(page);
+        checkoutPage = new CheckoutPage(page);
+
     }
 
     @AfterMethod

@@ -1,0 +1,85 @@
+Chào bạn, đây là một bộ mã nguồn (source code) kiểm thử tự động sử dụng **Playwright Java** kết hợp với **TestNG**.
+
+Dưới đây là phần giải thích chi tiết về cấu trúc, các nhóm chức năng và các kỹ thuật xử lý được sử dụng trong bài thực hành này.
+
+---
+
+## 1. Cấu trúc và Thiết lập (Setup & Teardown)
+
+Đoạn mã tuân thủ quy trình chuẩn của một bài TestNG:
+
+* **`@BeforeClass`**: Khởi tạo Playwright và trình duyệt (Chromium). Chế độ `setHeadless(false)` giúp bạn quan sát được quá trình chạy trên màn hình.
+* **`@BeforeMethod`**: Tạo một `BrowserContext` và `Page` mới cho mỗi test case để đảm bảo tính độc lập (Isolate). Sau đó điều hướng tới file HTML local.
+* **`@AfterMethod` & `@AfterClass**`: Đóng trình duyệt và giải phóng bộ nhớ sau khi chạy xong.
+
+---
+
+## 2. Các nhóm chức năng kiểm thử (Test Cases)
+
+### A. Các tương tác cơ bản (Basic Actions)
+
+* **Click/DoubleClick/RightClick**: Sử dụng `.click()`, `.dblclick()` và options `.setButton(RIGHT)`.
+* **Hover**: Sử dụng `.hover()` để kiểm tra các hiệu ứng khi di chuột qua phần tử.
+
+### B. Xử lý Form (Form Inputs)
+
+* **Điền dữ liệu**: Dùng `.fill()` cho email, password và textarea.
+* **Thanh trượt (Range)**: Một kỹ thuật hay ở đây là dùng `.evaluate()` để thay đổi giá trị của thanh trượt bằng JavaScript, sau đó `dispatchEvent("input")` để kích hoạt sự kiện cập nhật trên giao diện.
+
+### C. Checkbox, Radio & Select
+
+* **Checkbox/Radio**: Dùng `.check()` để chọn.
+* **Dropdown (Select)**:
+* `.selectOption("vn")`: Chọn 1 giá trị.
+* `.selectOption(new String[]{"api", "ui"})`: Chọn nhiều giá trị cùng lúc (Multi-select).
+
+
+
+### D. Nội dung động & Đợi (Dynamic Content & Waits)
+
+Đây là phần quan trọng nhất trong Automation:
+
+* **Timeout tùy chỉnh**: Sử dụng `setTimeout(3000)` trong Assertion để đợi một phần tử thay đổi trạng thái (ví dụ từ "loading" sang "loaded").
+* **Trạng thái phần tử**: Kiểm tra `isVisible()`, `isHidden()`, `isEnabled()`.
+* **Detached**: Đợi một phần tử bị xóa hoàn toàn khỏi DOM bằng `WaitForSelectorState.DETACHED`.
+
+### E. Hộp thoại (Dialogs) & Modal
+
+* **Native Dialog**: Playwright mặc định tự đóng các hộp thoại (Alert, Confirm, Prompt). Code sử dụng `page.onceDialog(Dialog::accept)` để bắt và nhấn "OK".
+* **Modal (Custom UI)**: Kiểm tra việc mở/đóng modal và tương tác với các input bên trong modal.
+
+### F. Bảng dữ liệu (Tables)
+
+* Kiểm tra tính năng **Filter** (lọc).
+* **Scoped Locator**: Tìm dòng cụ thể trong table (`tbody tr`), sau đó thực hiện hành động (click nút) **bên trong dòng đó**. Đây là kỹ thuật "Row-level action" rất phổ biến.
+
+### G. Drag & Drop & Upload
+
+* **Kéo thả**: Dùng lệnh đơn giản `source.dragTo(target)`.
+* **Upload file**: Dùng `.setInputFiles(path)`. Lưu ý cách lấy đường dẫn tuyệt đối (`toAbsolutePath()`) để tránh lỗi không tìm thấy file.
+
+### H. Tabs, List & Content Editable
+
+* **Tabs**: Chuyển đổi qua lại giữa các Tab và kiểm tra nội dung hiển thị tương ứng.
+* **List**: Thêm hàng loạt item, sau đó xóa một item cụ thể dựa trên chỉ mục (`nth(2)` - item thứ 3).
+* **Content Editable**: Kiểm tra khả năng nhập liệu vào các thẻ không phải input (như `div` có thuộc tính `contenteditable`).
+
+### I, J. IFrame & Shadow DOM
+
+* **IFrame**: Sử dụng `frameLocator("#id")` để "nhảy" vào bên trong khung của trang web khác.
+* **Shadow DOM**: Playwright cực kỳ mạnh mẽ vì nó tự động xuyên qua Shadow DOM. Bạn chỉ cần dùng CSS selector thông thường là có thể tìm thấy phần tử bên trong.
+
+### L. Navigation & Popups
+
+* **URL Hash**: Đợi cho đến khi URL thay đổi (ví dụ có thêm `#card-table`).
+* **Popup (Tab mới)**: Sử dụng `page.waitForPopup()` để bắt lấy đối tượng `Page` của tab mới vừa mở, sau đó thao tác trên tab đó rồi đóng lại.
+
+---
+
+## 3. Các điểm kỹ thuật đáng chú ý
+
+1. **Playwright Assertions**: Sử dụng `assertThat(locator)...` giúp code dễ đọc như ngôn ngữ tự nhiên và có cơ chế tự động đợi (auto-wait).
+2. **TestID**: Việc sử dụng `getByTestId` cho thấy HTML được thiết kế tốt cho Automation (giúp locator ổn định, không bị ảnh hưởng bởi thay đổi CSS/Giao diện).
+3. **Clean Code**: Các test case được đặt tên rõ ràng (A1, A2, B5...) và phân nhóm bằng comment giúp dễ quản lý.
+
+**Bạn có muốn tôi giải thích sâu hơn về một hàm cụ thể nào hoặc hướng dẫn cách chạy bộ test này trên máy của bạn không?**
