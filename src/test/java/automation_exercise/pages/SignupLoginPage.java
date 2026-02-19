@@ -20,4 +20,24 @@ public class SignupLoginPage {
     public void clickSignupButton() {
         page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Signup")).click();
     }
+
+    public void fillLoginForm(String email, String password) {
+        page.locator("form").filter(new Locator.FilterOptions().setHasText("Login")).getByPlaceholder("Email Address").fill(email);
+        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Password")).fill(password);
+    }
+
+    public void clickLoginButton() {
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Login")).click();
+    }
+
+    // Thêm hàm này vào SignupLoginPage.java
+    public String getErrorMessage() {
+        return page.locator("form[action='/login'] p").innerText();
+    }
+
+    // Thêm vào SignupLoginPage.java
+    public String getSignupErrorMessage() {
+        // Locator này nhắm vào thông báo lỗi riêng của form Signup
+        return page.locator("form[action='/signup'] p").innerText();
+    }
 }
