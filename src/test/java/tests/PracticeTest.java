@@ -12,7 +12,7 @@ public class PracticeTest extends BaseTest {
     @Test
     public void testFillPracticeForm() {
         PracticePage practicePage = new PracticePage(page);
-        page.navigate("file:///Users/macos/Desktop/PlaywrightJavaFramework/src/test/java/tests/practice.html");
+        page.navigate("/Users/anhnd44/Desktop/Playwright-Java-POM-Framework/src/test/java/tests/practice.html");
         page.waitForLoadState(LoadState.NETWORKIDLE);
         practicePage.fillInformation("Nguyễn Đức Anh", "dev");
         practicePage.clickSubmit();

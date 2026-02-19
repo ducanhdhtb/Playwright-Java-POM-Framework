@@ -85,9 +85,3 @@ Sau khi chạy xong, kết quả sẽ bao gồm:
 
 ---
 
-### Mày nên làm gì tiếp theo?
-
-* **Thêm ảnh chụp màn hình:** Mày nên chạy bài test, chụp lại cái ảnh giao diện **Allure Report** rồi đẩy lên Git, sau đó chèn link ảnh vào file README này cho nó "ngầu".
-* **Tài liệu Manual:** Như mày đã yêu cầu trước đó, mày có muốn tao tạo luôn file **PDF về kiến thức Manual Testing (Scrum, Test Case, Bug Report)** để mày đính kèm vào phần tài liệu học tập trong dự án này không?
-
-Mày thấy file README này đã đủ "cháy" chưa? Cần thêm bớt mục nào cứ bảo tao nhé!
