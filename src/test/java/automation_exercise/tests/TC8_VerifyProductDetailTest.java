@@ -7,7 +7,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC8_VerifyProductDetailTest extends BaseTest {
 
-    @Test
+    @Test(priority = 8)
     public void testVerifyAllProductsAndDetail() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate();

@@ -8,7 +8,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC7_VerifyTestCasesPage extends BaseTest {
 
-    @Test
+    @Test(priority = 7)
     public void testVerifyTestCasesPageNavigation() {
         // 1 & 2. Khởi tạo trình duyệt và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate();

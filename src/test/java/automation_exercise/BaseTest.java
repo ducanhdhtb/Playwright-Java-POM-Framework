@@ -26,6 +26,11 @@ public class BaseTest {
 
     protected ProductDetailPage productDetailPage;
 
+    protected SignupLoginPage signupPage;
+
+
+    protected CheckoutPage checkoutPage;
+
     @BeforeClass
     public void setupBrowser() {
         playwright = Playwright.create();
@@ -56,6 +61,8 @@ public class BaseTest {
         paymentPage = new PaymentPage(page);
         contactPage = new ContactUsPage(page);
         productDetailPage = new ProductDetailPage(page);
+        signupPage = new SignupLoginPage(page);
+        checkoutPage = new CheckoutPage(page);
 
     }
 

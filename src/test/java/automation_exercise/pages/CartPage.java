@@ -19,6 +19,14 @@ public class CartPage {
     private final String SUBSCRIBE_BUTTON   = "#subscribe";
     private final String SUCCESS_MESSAGE    = ".alert-success";
     private final String CART_ROWS = "#cart_info_table tbody tr";
+    // Locators
+    private final String PROCEED_TO_CHECKOUT_BTN = ".check_out";
+    private final String REGISTER_LOGIN_MODAL_LINK = "u:has-text('Register / Login')";
+
+    // Locators mới cho TC17
+    private final String DELETE_PRODUCT_BTN = ".cart_quantity_delete";
+    private final String EMPTY_CART_MSG = "#empty_cart";
+
 
     public CartPage(Page page) {
         this.page = page;
@@ -33,6 +41,19 @@ public class CartPage {
     /**
      * Scrolls down to the footer section of the Cart page.
      */
+    /**
+     * Clicks the 'Proceed To Checkout' button.
+     */
+    public void clickProceedToCheckout() {
+        page.locator(PROCEED_TO_CHECKOUT_BTN).click();
+    }
+
+    /**
+     * Clicks the 'Register / Login' link inside the checkout modal.
+     */
+    public void clickRegisterLoginModal() {
+        page.locator(REGISTER_LOGIN_MODAL_LINK).click();
+    }
     public void scrollToFooter() {
         page.locator(FOOTER).scrollIntoViewIfNeeded();
     }
@@ -54,6 +75,15 @@ public class CartPage {
         // Sử dụng tên ngắn gọn nhờ vào các dòng import ở trên
         page.getByRole(AriaRole.LINK, new GetByRoleOptions().setName("Register / Login")).click();
     }
+
+    /**
+     * Clicks the 'X' button to remove a specific product from the cart.
+     * @param index The zero-based index of the product in the cart list.
+     */
+    public void removeProductByIndex(int index) {
+        page.locator(DELETE_PRODUCT_BTN).nth(index).click();
+    }
+
 
     // ==========================================
     // 3. VERIFICATIONS
@@ -94,6 +124,14 @@ public class CartPage {
         assertThat(row.locator(".cart_price")).hasText(price);
         assertThat(row.locator(".cart_quantity")).hasText(quantity);
         assertThat(row.locator(".cart_total")).hasText(total);
+    }
+
+    /**
+     * Verifies that the cart is empty or a specific product is gone.
+     */
+    public void verifyProductIsRemoved() {
+        // Đợi một chút để UI cập nhật sau khi xóa
+        assertThat(page.locator(EMPTY_CART_MSG)).isVisible();
     }
 
 }

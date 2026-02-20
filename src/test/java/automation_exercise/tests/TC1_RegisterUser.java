@@ -9,7 +9,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 // Kế thừa từ BaseTest
 public class TC1_RegisterUser extends BaseTest {
 
-    @Test
+    @Test(priority = 1)
     public void testRegisterUser() {
         // 1. Dùng homePage từ BaseTest
         homePage.navigate();

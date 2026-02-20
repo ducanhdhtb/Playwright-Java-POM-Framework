@@ -8,7 +8,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC4_LogoutTest extends BaseTest {
 
-    @Test
+    @Test(priority = 4)
     public void testLogoutUser() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate();

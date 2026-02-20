@@ -109,6 +109,7 @@ public class ProductsPage {
         }
     }
 
+
 //    Dễ hiểu nhất thì bạn hãy tưởng tượng cái Pattern này giống như một "Khuôn đúc" hoặc một "Bộ lọc thông minh" vậy.
 //    1. Ví dụ đời thực
 //    Giả sử bạn có một cái máy lọc đồ chơi.
@@ -128,4 +129,27 @@ public class ProductsPage {
 //    BLUE SHIRT	           PASS	Khớp                      vì đã bật chế độ không phân biệt hoa thường.
 //    dark blue jeans	       PASS	                          Khớp vì có chứa chữ "blue" bên trong.
 //    Red Dress	               FAIL	                          Không có chữ "blue" nào cả.
+
+    /**
+     * Navigates to the product detail page by clicking the 'View Product' link of a specific item.
+     * @param index The zero-based index of the product.
+     */
+    public void clickViewProductByIndex(int index) {
+        page.locator(".choose a").nth(index).click();
+    }
+
+    private String brandsSidebar = "//div[@class='brands_products']";
+
+    public void verifyBrandsVisible() {
+        assertThat(page.locator(brandsSidebar)).isVisible();
+    }
+
+    public void selectBrand(String brandName) {
+        page.locator("//a[contains(text(),'" + brandName + "')]").click();
+    }
+
+    public void verifyBrandPage(String brandName) {
+        assertThat(page.locator("//h2[contains(text(),'" + brandName + "')]"))
+                .isVisible();
+    }
 }

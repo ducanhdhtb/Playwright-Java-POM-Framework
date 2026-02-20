@@ -27,6 +27,13 @@ public class HomePage {
     private final String CONTACT_US_LINK    = "Contact us";
     private final String TEST_CASES_LINK    = "Test Cases";
     private final String PRODUCTS_LINK      = "Products";
+    private final String CART_LINK          = "Cart";
+
+    // Locators cho Category Sidebar
+    private final String CATEGORY_SIDEBAR = ".left-sidebar";
+    private final String WOMEN_CATEGORY   = "a[href='#Women']";
+    private final String MEN_CATEGORY     = "a[href='#Men']";
+    private final String CATEGORY_TITLE   = ".title.text-center";
 
     public HomePage(Page page) {
         this.page = page;
@@ -105,4 +112,53 @@ public class HomePage {
         assertThat(page.locator(SUCCESS_MESSAGE)).isVisible();
         assertThat(page.locator(SUCCESS_MESSAGE)).hasText("You have been successfully subscribed!");
     }
+
+    /**
+     * Verifies that the 'Logged in as [username]' text is visible in the header.
+     * @param username The expected username to be displayed.
+     */
+    public void verifyLoggedInAs(String username) {
+        // Playwright locator with text-based matching
+        com.microsoft.playwright.Locator loginStatus = page.locator("text=Logged in as " + username);
+        assertThat(loginStatus).isVisible();
+    }
+
+    public void clickCart() {
+        // Fix lỗi gạch đỏ ở bước 12 trong TC14
+        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(CART_LINK)).first().click();
+    }
+
+    /**
+     * Verifies that the categories sidebar is visible.
+     */
+    public void verifyCategoriesVisible() {
+        assertThat(page.locator(CATEGORY_SIDEBAR)).isVisible();
+    }
+
+    /**
+     * Clicks on a main category and then a specific sub-category.
+     * @param mainCategory Locator string for the main category (e.g., Women, Men).
+     * @param subCategory Text of the sub-category (e.g., Dress, Tshirts).
+     */
+    public void selectCategory(String mainCategory, String subCategory) {
+        page.locator(mainCategory).click();
+        page.getByRole(com.microsoft.playwright.options.AriaRole.LINK,
+                new Page.GetByRoleOptions().setName(subCategory)).click();
+    }
+
+    public void selectBrand(String brandLink) {
+        page.getByRole(com.microsoft.playwright.options.AriaRole.LINK,
+                new Page.GetByRoleOptions().setName(brandLink)).click();
+    }
+
+    /**
+     * Verifies the text title of the displayed category page.
+     * @param expectedTitle The expected header text (e.g., "WOMEN - DRESS PRODUCTS").
+     */
+    public void verifyCategoryPageTitle(String expectedTitle) {
+        // Sử dụng Pattern CASE_INSENSITIVE để tránh lỗi hoa thường như đã thảo luận
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(expectedTitle, java.util.regex.Pattern.CASE_INSENSITIVE);
+        assertThat(page.locator(CATEGORY_TITLE)).containsText(pattern);
+    }
+
 }

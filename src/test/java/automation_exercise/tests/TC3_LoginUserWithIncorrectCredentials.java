@@ -7,7 +7,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC3_LoginUserWithIncorrectCredentials extends BaseTest {
 
-    @Test
+    @Test(priority = 3)
     public void testLoginWithIncorrectCredentials() {
         // 1 & 2. Launch & Navigate (Đã có trong BaseTest)
         homePage.navigate();

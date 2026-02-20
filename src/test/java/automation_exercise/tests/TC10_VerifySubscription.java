@@ -6,7 +6,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC10_VerifySubscription extends BaseTest {
 
-    @Test(description = "Test Case 10: Verify Subscription in home page")
+    @Test(priority = 10)
     public void verifySubscription() {
         // 1 & 2. Launch browser and Navigate to URL
         homePage.navigate();

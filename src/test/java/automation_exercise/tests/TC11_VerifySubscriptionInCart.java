@@ -6,7 +6,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC11_VerifySubscriptionInCart extends BaseTest {
 
-    @Test(description = "Test Case 11: Verify Subscription in Cart page")
+    @Test(description = "Test Case 11: Verify Subscription in Cart page",priority = 11)
     public void verifySubscriptionInCart() {
         // 1 & 2. Launch browser and Navigate to URL
         homePage.navigate();

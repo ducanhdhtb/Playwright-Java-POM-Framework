@@ -6,7 +6,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC9_SearchProduct extends BaseTest {
 
-    @Test
+    @Test(priority = 9)
     public void searchProduct() {
         homePage.navigate();
         homePage.clickProducts();

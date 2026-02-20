@@ -46,6 +46,7 @@ public class PlaywrightPracticeTest {
         if (context != null) context.close();
     }
 
+
     @AfterClass(alwaysRun = true)
     public void afterClass() {
         if (browser != null) browser.close();

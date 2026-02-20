@@ -8,7 +8,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC2_LoginUserWithCorrectCredentials extends BaseTest {
 
-    @Test
+    @Test(priority = 2)
     public void testLoginUserWithCorrectCredentials() {
         // 1. Launch browser & 2. Navigate to url (Đã xử lý trong BaseTest và navigate)
         homePage.navigate();

@@ -9,7 +9,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC6_ContactUsForm extends BaseTest {
 
-    @Test
+    @Test(priority = 6)
     public void testContactUsForm() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate();

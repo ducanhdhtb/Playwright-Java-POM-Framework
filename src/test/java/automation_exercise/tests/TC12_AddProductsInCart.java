@@ -6,7 +6,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC12_AddProductsInCart extends BaseTest {
 
-    @Test(description = "Test Case 12: Add Products in Cart")
+    @Test(description = "Test Case 12: Add Products in Cart",priority = 12)
     public void addProductsToCart() {
         // 1-3. Launch and Verify Home Page
         homePage.navigate();

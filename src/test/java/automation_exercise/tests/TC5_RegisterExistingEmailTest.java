@@ -8,7 +8,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC5_RegisterExistingEmailTest extends BaseTest {
 
-    @Test
+    @Test(priority = 5)
     public void testRegisterWithExistingEmail() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate();
