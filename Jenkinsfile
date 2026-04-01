@@ -1,4 +1,8 @@
 node {
+  // Ensure Maven from Jenkins tool config is on PATH
+  def mvnHome = tool name: 'maven3', type: 'maven'
+  env.PATH = "${mvnHome}/bin:${env.PATH}"
+
   stage('Init') {
     echo "Pipeline loaded from ${env.BRANCH_NAME ?: 'unknown branch'} commit ${env.GIT_COMMIT ?: 'unknown'}"
   }
