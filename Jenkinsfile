@@ -17,6 +17,12 @@ pipeline {
   }
 
   stages {
+    stage('Init') {
+      steps {
+        echo "Pipeline loaded from ${env.BRANCH_NAME ?: 'unknown branch'} commit ${env.GIT_COMMIT ?: 'unknown'}"
+      }
+    }
+
     stage('Checkout') {
       steps {
         checkout scm
