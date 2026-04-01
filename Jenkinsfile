@@ -4,7 +4,11 @@ node {
   }
 
   stage('Checkout') {
-    checkout scm
+    checkout([
+      $class: 'GitSCM',
+      branches: [[name: env.BRANCH_NAME ?: '*/main']],
+      userRemoteConfigs: [[url: 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git']]
+    ])
   }
 
   stage('Install Browsers') {
