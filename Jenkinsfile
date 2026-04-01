@@ -1,56 +1,22 @@
-pipeline {
-  agent any
-
-  tools {
-    jdk 'jdk17'
-    maven 'maven3'
+node {
+  stage('Init') {
+    echo "Pipeline loaded from ${env.BRANCH_NAME ?: 'unknown branch'} commit ${env.GIT_COMMIT ?: 'unknown'}"
   }
 
-  options {
-    timestamps()
-    ansiColor('xterm')
+  stage('Checkout') {
+    checkout scm
   }
 
-  environment {
-    PLAYWRIGHT_BROWSERS_PATH = "${WORKSPACE}/.cache/ms-playwright"
-    MAVEN_OPTS = "-Dmaven.test.failure.ignore=true"
+  stage('Install Browsers') {
+    sh 'mvn -B -DskipTests exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium"'
   }
 
-  stages {
-    stage('Init') {
-      steps {
-        echo "Pipeline loaded from ${env.BRANCH_NAME ?: 'unknown branch'} commit ${env.GIT_COMMIT ?: 'unknown'}"
-      }
-    }
+  stage('Test') {
+    sh 'mvn -B clean test'
+  }
 
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
-    stage('Install Browsers') {
-      steps {
-        sh 'mvn -B -DskipTests exec:java -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium"'
-      }
-    }
-
-    stage('Test') {
-      steps {
-        sh 'mvn -B clean test'
-      }
-      post {
-        always {
-          junit 'target/surefire-reports/*.xml'
-          archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true
-        }
-      }
-    }
-
-    stage('Allure Report') {
-      steps {
-        allure includeProperties: false, jdk: '', results: [[path: 'target/allure-results']]
-      }
-    }
+  stage('Post') {
+    junit 'target/surefire-reports/*.xml'
+    archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true
   }
 }
