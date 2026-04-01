@@ -1,7 +1,11 @@
 node {
-  // Ensure Maven from Jenkins tool config is on PATH
-  def mvnHome = tool name: 'maven3', type: 'maven'
-  env.PATH = "${mvnHome}/bin:${env.PATH}"
+  // Prefer Jenkins-managed Maven; fall back to system mvn
+  try {
+    def mvnHome = tool name: 'maven3', type: 'maven'
+    env.PATH = "${mvnHome}/bin:${env.PATH}"
+  } catch(Exception e) {
+    echo "Warning: Jenkins Maven tool 'maven3' not found, using system mvn if present"
+  }
 
   stage('Init') {
     echo "Pipeline loaded from ${env.BRANCH_NAME ?: 'unknown branch'} commit ${env.GIT_COMMIT ?: 'unknown'}"
