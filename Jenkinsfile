@@ -7,7 +7,8 @@ node {
   }
 
   stage('Checkout') {
-    git repoUrl
+    git branch: 'dev_jenkin',
+        url: repoUrl
   }
 
   stage('Install Browsers') {
@@ -23,7 +24,7 @@ node {
   }
 
   stage('Report') {
-    junit 'target/surefire-reports/*.xml'
+    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
     allure([
       results: [[path: 'target/allure-results']]
