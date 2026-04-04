@@ -1,35 +1,29 @@
 node {
 
+  // Config
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
+  def branchName = env.BRANCH_NAME ?: 'main'
 
-  // 🔥 FIX MAVEN
-  def mvnHome = tool name: 'maven3', type: 'maven'
-  env.PATH = "${mvnHome}/bin:${env.PATH}"
+  // Maven tool (fallback to system mvn)
+  try {
+    def mvnHome = tool name: 'maven3', type: 'maven'
+    env.PATH = "${mvnHome}/bin:${env.PATH}"
+  } catch(Exception e) {
+    echo "⚠️ Maven tool 'maven3' not configured, using system mvn"
+  }
 
   stage('Init') {
-    echo "Start"
+    echo "[Init] Repo: ${repoUrl}"
+    echo "[Init] Branch: ${branchName}"
   }
 
   stage('Checkout') {
     echo "[Checkout] Start"
-    git branch: 'dev_jenkin', url: repoUrl
-    // Ensure missing listener class exists to avoid TestNG error
-    sh '''
-    mkdir -p src/test/java/utils
-    if [ ! -f src/test/java/utils/StepLoggerListener.java ]; then
-      cat > src/test/java/utils/StepLoggerListener.java <<'EOF'
-package utils;
-import org.testng.IInvokedMethod;
-import org.testng.IInvokedMethodListener;
-import org.testng.ITestResult;
-public class StepLoggerListener implements IInvokedMethodListener {
-  @Override public void beforeInvocation(IInvokedMethod m, ITestResult r) {}
-  @Override public void afterInvocation(IInvokedMethod m, ITestResult r) {}
-}
-EOF
-      echo "[Checkout] Added stub StepLoggerListener.java"
-    fi
-    '''
+    cleanWs()
+    checkout([$class: 'GitSCM',
+      branches: [[name: "*/${branchName}"]],
+      userRemoteConfigs: [[url: repoUrl]]
+    ])
     echo "[Checkout] Done"
   }
 
@@ -37,8 +31,8 @@ EOF
     echo "[Install Browsers] Start"
     sh '''
     mvn -B -DskipTests exec:java \
-    -Dexec.mainClass=com.microsoft.playwright.CLI \
-    -Dexec.args="install chromium"
+      -Dexec.mainClass=com.microsoft.playwright.CLI \
+      -Dexec.args="install chromium"
     '''
     echo "[Install Browsers] Done"
   }
@@ -52,8 +46,10 @@ EOF
   stage('Report') {
     echo "[Report] JUnit..."
     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+
     echo "[Report] Archive allure results..."
     archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true, allowEmptyArchive: true
+
     script {
       if (fileExists('target/allure-results')) {
         echo "[Report] Allure plugin not installed here; results archived only."

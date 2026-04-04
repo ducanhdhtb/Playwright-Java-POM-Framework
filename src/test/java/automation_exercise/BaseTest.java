@@ -36,11 +36,13 @@ public class BaseTest {
     }
 
     private boolean headless() {
-        return Boolean.parseBoolean(System.getenv().getOrDefault("HEADLESS", "false"));
+        return Boolean.parseBoolean(System.getenv().getOrDefault(
+                "HEADLESS", System.getProperty("headless", "true")));
     }
 
     private double slowMo() {
-        return Double.parseDouble(System.getenv().getOrDefault("SLOWMO", "500"));
+        return Double.parseDouble(System.getenv().getOrDefault(
+                "SLOWMO", System.getProperty("slowMo", "0")));
     }
 
     @BeforeClass
