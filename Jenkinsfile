@@ -18,33 +18,41 @@ node {
   try {
 
     stage('Init') {
+      echo "[Init] Start"
       echo "🚀 ENV: ${env.ENV}"
       echo "🌿 BRANCH: ${env.BRANCH_NAME ?: 'main'}"
+      echo "[Init] Done"
     }
 
     stage('Checkout') {
+      echo "[Checkout] Start"
       cleanWs()
       checkout([
         $class: 'GitSCM',
         branches: [[name: env.BRANCH_NAME ?: '*/main']],
         userRemoteConfigs: [[url: repoUrl]]
       ])
+      echo "[Checkout] Done"
     }
 
     stage('Install Browsers') {
+      echo "[Install Browsers] Start"
       sh '''
       mvn -B -DskipTests exec:java \
       -Dexec.mainClass=com.microsoft.playwright.CLI \
       -Dexec.args="install chromium"
       '''
+      echo "[Install Browsers] Done"
     }
 
     stage('Run Test') {
+      echo "[Run Test] Start"
       timeout(time: 30, unit: 'MINUTES') {
         retry(2) {
           sh 'mvn -B clean test'
         }
       }
+      echo "[Run Test] Done"
     }
 
   } catch (err) {
@@ -55,17 +63,17 @@ node {
 
     stage('Publish Report') {
 
-      echo "📊 Publishing JUnit report..."
+      echo "[Publish] JUnit..."
       junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
-      echo "📈 Publishing Allure report..."
+      echo "[Publish] Allure..."
       allure([
         includeProperties: false,
         jdk: '',
         results: [[path: 'target/allure-results']]
       ])
 
-      echo "📦 Archiving artifacts..."
+      echo "[Publish] Archive..."
       archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true
     }
 
