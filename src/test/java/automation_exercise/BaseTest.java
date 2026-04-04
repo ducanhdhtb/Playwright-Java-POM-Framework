@@ -31,12 +31,20 @@ public class BaseTest {
 
     protected CheckoutPage checkoutPage;
 
+    private boolean headless() {
+        return Boolean.parseBoolean(System.getenv().getOrDefault("HEADLESS", "true"));
+    }
+
+    private double slowMo() {
+        return Double.parseDouble(System.getenv().getOrDefault("SLOWMO", "0"));
+    }
+
     @BeforeClass
     public void setupBrowser() {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                .setHeadless(false)
-                .setSlowMo(1000));
+                .setHeadless(headless())
+                .setSlowMo(slowMo()));
     }
 
     @BeforeMethod
