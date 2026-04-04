@@ -1,11 +1,16 @@
 node {
 
-  // Maven setup
+  // ====== CONFIG ======
+  env.ENV = "staging"
+  env.BROWSER = "chromium"
+  def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
+
+  // ====== MAVEN SETUP ======
   try {
     def mvnHome = tool name: 'maven3', type: 'maven'
     env.PATH = "${mvnHome}/bin:${env.PATH}"
   } catch(Exception e) {
-    echo "Warning: using system mvn"
+    echo "⚠️ Using system mvn"
   }
 
   boolean failed = false
@@ -13,14 +18,16 @@ node {
   try {
 
     stage('Init') {
-      echo "Pipeline from ${env.BRANCH_NAME ?: 'unknown'} - ${env.GIT_COMMIT ?: 'unknown'}"
+      echo "🚀 ENV: ${env.ENV}"
+      echo "🌿 BRANCH: ${env.BRANCH_NAME ?: 'main'}"
     }
 
     stage('Checkout') {
+      cleanWs()
       checkout([
         $class: 'GitSCM',
         branches: [[name: env.BRANCH_NAME ?: '*/main']],
-        userRemoteConfigs: [[url: 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git']]
+        userRemoteConfigs: [[url: repoUrl]]
       ])
     }
 
@@ -32,46 +39,59 @@ node {
       '''
     }
 
-    stage('Test') {
-      sh 'mvn -B clean test'
+    stage('Run Test') {
+      timeout(time: 30, unit: 'MINUTES') {
+        retry(2) {
+          sh 'mvn -B clean test'
+        }
+      }
     }
 
   } catch (err) {
     failed = true
     currentBuild.result = 'FAILURE'
-    echo "❌ Test failed"
+    echo "❌ ERROR: ${err}"
   } finally {
 
-    // 🔥 LUÔN chạy report dù pass hay fail
-    stage('Report') {
+    stage('Publish Report') {
 
-      // JUnit để Jenkins hiểu pass/fail test detail
+      echo "📊 Publishing JUnit report..."
       junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
-      // 🔥 Allure render UI (cái mày đang thiếu)
+      echo "📈 Publishing Allure report..."
       allure([
         includeProperties: false,
         jdk: '',
         results: [[path: 'target/allure-results']]
       ])
 
-      // (optional) vẫn giữ archive nếu muốn download raw file
+      echo "📦 Archiving artifacts..."
       archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true
     }
 
-    // 📧 Email
-    if (failed) {
+    stage('Notify') {
+
+      def status = failed ? "❌ FAILED" : "✅ SUCCESS"
+
       mail to: 'ducanhdhtb@gmail.com',
-           subject: "❌ FAILURE ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-           body: "Build failed\n${env.BUILD_URL}"
-    } else {
-      mail to: 'ducanhdhtb@gmail.com',
-           subject: "✅ SUCCESS ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-           body: "Build passed\n${env.BUILD_URL}"
+           subject: "${status} ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+           body: """
+🔥 Build Result: ${status}
+
+📦 Job: ${env.JOB_NAME}
+🔢 Build: ${env.BUILD_NUMBER}
+🌿 Branch: ${env.BRANCH_NAME}
+
+🔗 Link: ${env.BUILD_URL}
+📊 Allure: ${env.BUILD_URL}allure
+
+      """
     }
 
     if (failed) {
-      error("Build failed") // 🔥 ép Jenkins mark đỏ
+      error("🚨 Build failed")
+    } else {
+      echo "🎉 Build success"
     }
   }
 }

@@ -31,12 +31,16 @@ public class BaseTest {
 
     protected CheckoutPage checkoutPage;
 
+    public Page getPage() {
+        return page;
+    }
+
     private boolean headless() {
-        return Boolean.parseBoolean(System.getenv().getOrDefault("HEADLESS", "true"));
+        return Boolean.parseBoolean(System.getenv().getOrDefault("HEADLESS", "false"));
     }
 
     private double slowMo() {
-        return Double.parseDouble(System.getenv().getOrDefault("SLOWMO", "0"));
+        return Double.parseDouble(System.getenv().getOrDefault("SLOWMO", "500"));
     }
 
     @BeforeClass

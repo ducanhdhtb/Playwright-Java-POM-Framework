@@ -4,7 +4,8 @@ import com.microsoft.playwright.Page;
 import io.qameta.allure.Allure;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-import tests.BaseTest;
+import automation_exercise.BaseTest;
+
 import java.io.ByteArrayInputStream;
 
 public class TestListener implements ITestListener {
