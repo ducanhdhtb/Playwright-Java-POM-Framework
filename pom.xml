@@ -127,6 +127,14 @@
       <version>2.24.0</version>
     </dependency>
 
+    <!-- AspectJ runtime for test aspects (StepAspect) -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>${aspectj.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
 </project>
