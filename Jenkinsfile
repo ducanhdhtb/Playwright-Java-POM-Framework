@@ -2,7 +2,7 @@ node {
 
   // Config
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
-  def branchName = env.BRANCH_NAME ?: 'main'
+  def branchName = env.BRANCH_NAME ?: 'dev_jenkin'
 
   // Maven tool (fallback to system mvn)
   try {
