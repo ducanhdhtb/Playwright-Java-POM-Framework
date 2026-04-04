@@ -24,6 +24,20 @@ node {
       branches: [[name: "*/${branchName}"]],
       userRemoteConfigs: [[url: repoUrl]]
     ])
+    // Ensure StepLoggerListener exists to avoid TestNG classpath error
+    sh '''
+    mkdir -p src/test/java/utils
+    cat > src/test/java/utils/StepLoggerListener.java <<'EOF'
+package utils;
+import org.testng.IInvokedMethod;
+import org.testng.IInvokedMethodListener;
+import org.testng.ITestResult;
+public class StepLoggerListener implements IInvokedMethodListener {
+  @Override public void beforeInvocation(IInvokedMethod m, ITestResult r) {}
+  @Override public void afterInvocation(IInvokedMethod m, ITestResult r) {}
+}
+EOF
+    '''
     echo "[Checkout] Done"
   }
 
