@@ -3,9 +3,6 @@
 <suite name="Playwright Suite" verbose="1" parallel="false">
   <test name="All Tests">
     <packages>
-      <package name="tests"/>
-      <package name="authen"/>
-      <package name="saucedemo"/>
       <package name="automation_exercise"/>
     </packages>
   </test>
