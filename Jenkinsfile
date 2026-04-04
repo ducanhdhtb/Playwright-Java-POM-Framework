@@ -66,15 +66,16 @@ node {
       echo "[Publish] JUnit..."
       junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
-      echo "[Publish] Allure..."
-      allure([
-        includeProperties: false,
-        jdk: '',
-        results: [[path: 'target/allure-results']]
-      ])
+      echo "[Publish] Archive artifacts..."
+      archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true, allowEmptyArchive: true
 
-      echo "[Publish] Archive..."
-      archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true
+      script {
+        if (fileExists('target/allure-results')) {
+          echo "[Publish] Allure plugin not installed or skipped; results archived only."
+        } else {
+          echo "[Publish] No allure-results directory; skip."
+        }
+      }
     }
 
     stage('Notify') {
