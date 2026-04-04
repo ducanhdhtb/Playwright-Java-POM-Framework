@@ -2,13 +2,16 @@ node {
 
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
 
+  // 🔥 FIX MAVEN
+  def mvnHome = tool name: 'maven3', type: 'maven'
+  env.PATH = "${mvnHome}/bin:${env.PATH}"
+
   stage('Init') {
     echo "Start"
   }
 
   stage('Checkout') {
-    git branch: 'dev_jenkin',
-        url: repoUrl
+    git branch: 'dev_jenkin', url: repoUrl
   }
 
   stage('Install Browsers') {
