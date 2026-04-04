@@ -61,16 +61,11 @@ EOF
     echo "[Report] JUnit..."
     junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 
+    echo "[Report] Allure..."
+    allure includeProperties: false, jdk: '', results: [[path: 'target/allure-results']]
+
     echo "[Report] Archive allure results..."
     archiveArtifacts artifacts: 'target/allure-results/**', fingerprint: true, allowEmptyArchive: true
-
-    script {
-      if (fileExists('target/allure-results')) {
-        echo "[Report] Allure plugin not installed here; results archived only."
-      } else {
-        echo "[Report] No allure results found."
-      }
-    }
   }
 
   stage('Notify') {
