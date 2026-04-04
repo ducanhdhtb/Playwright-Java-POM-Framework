@@ -19,7 +19,7 @@ node {
 
   stage('Checkout') {
     echo "[Checkout] Start"
-    cleanWs()
+    deleteDir() // clean workspace (built-in, no extra plugin)
     checkout([$class: 'GitSCM',
       branches: [[name: "*/${branchName}"]],
       userRemoteConfigs: [[url: repoUrl]]
