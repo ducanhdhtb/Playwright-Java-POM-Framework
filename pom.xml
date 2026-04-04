@@ -43,6 +43,9 @@
           <argLine>
             -javaagent:"${project.build.directory}/aspectjweaver-1.9.19.jar"
           </argLine>
+          <suiteXmlFiles>
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
         </configuration>
       </plugin>
 
