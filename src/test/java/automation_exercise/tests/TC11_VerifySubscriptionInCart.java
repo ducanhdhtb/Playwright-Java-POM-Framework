@@ -2,6 +2,8 @@ package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC11_VerifySubscriptionInCart extends BaseTest {
@@ -9,7 +11,7 @@ public class TC11_VerifySubscriptionInCart extends BaseTest {
     @Test(description = "Test Case 11: Verify Subscription in Cart page",priority = 11)
     public void verifySubscriptionInCart() {
         // 1 & 2. Launch browser and Navigate to URL
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
         assertThat(page).hasTitle("Automation Exercise");

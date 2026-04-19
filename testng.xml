@@ -3,7 +3,6 @@
 <suite name="Playwright Suite" verbose="1" parallel="false">
   <listeners>
     <listener class-name="utils.TestListener"/>
-    <listener class-name="utils.StepLoggerListener"/>
   </listeners>
   <test name="All Tests">
     <packages>

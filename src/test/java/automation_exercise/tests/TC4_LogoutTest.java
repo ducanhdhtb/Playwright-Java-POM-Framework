@@ -4,6 +4,8 @@ import automation_exercise.BaseTest;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC4_LogoutTest extends BaseTest {
@@ -11,7 +13,7 @@ public class TC4_LogoutTest extends BaseTest {
     @Test(priority = 4)
     public void testLogoutUser() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
         assertThat(page).hasTitle("Automation Exercise");

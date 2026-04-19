@@ -2,6 +2,7 @@ package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
 
 public class TC19_ViewCartBrandProducts extends BaseTest {
 
@@ -9,7 +10,7 @@ public class TC19_ViewCartBrandProducts extends BaseTest {
     public void viewCartBrandProducts() {
 
         // 1-2 Navigate to Home
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3 Click Products
         homePage.clickProducts();

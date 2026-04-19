@@ -1,6 +1,6 @@
 package automation_exercise;
 
-import automation_exercise.pages.*;
+import pages.*;
 import com.microsoft.playwright.*;
 import org.testng.ITestResult;
 import org.testng.annotations.*;

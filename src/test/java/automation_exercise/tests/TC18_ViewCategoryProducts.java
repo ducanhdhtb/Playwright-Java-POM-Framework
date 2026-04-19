@@ -2,6 +2,8 @@ package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC18_ViewCategoryProducts extends BaseTest {
@@ -9,7 +11,7 @@ public class TC18_ViewCategoryProducts extends BaseTest {
     @Test(description = "Test Case 18: View Category Products",priority = 18)
     public void viewCategoryProducts() {
         // 1-3. Launch and Verify Home Page & Categories
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
         homePage.verifyCategoriesVisible();
 
         // 4-5. Click 'Women' -> 'Dress'

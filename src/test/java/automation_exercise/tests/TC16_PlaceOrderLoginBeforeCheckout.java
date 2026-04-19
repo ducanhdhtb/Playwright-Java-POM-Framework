@@ -2,6 +2,8 @@ package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC16_PlaceOrderLoginBeforeCheckout extends BaseTest {
@@ -9,7 +11,7 @@ public class TC16_PlaceOrderLoginBeforeCheckout extends BaseTest {
     @Test(description = "Test Case 16: Place Order: Login before Checkout",priority = 16)
     public void placeOrderLoginBeforeCheckout() {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
         assertThat(page).hasTitle("Automation Exercise");
 
         // 4. Click 'Signup / Login' button
