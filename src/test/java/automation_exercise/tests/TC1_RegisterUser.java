@@ -3,6 +3,7 @@ package automation_exercise.tests;
 import automation_exercise.BaseTest;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 import utils.TestData;
@@ -16,6 +17,7 @@ public class TC1_RegisterUser extends BaseTest {
             dataProvider = "newUserRegistrationDataProvider",
             dataProviderClass = TestData.class
     )
+    @Step("TC1: Register a new user")
     public void testRegisterUser(
             String name, String password, String day, String month, String year,
             String firstName, String lastName, String company, String address, String country,

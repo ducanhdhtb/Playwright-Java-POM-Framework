@@ -1,6 +1,7 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 
@@ -9,6 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class TC11_VerifySubscriptionInCart extends BaseTest {
 
     @Test(description = "Test Case 11: Verify Subscription in Cart page",priority = 11)
+    @Step("TC11: Verify subscription on cart page")
     public void verifySubscriptionInCart() {
         // 1 & 2. Launch browser and Navigate to URL
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

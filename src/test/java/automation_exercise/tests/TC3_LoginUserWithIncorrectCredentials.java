@@ -3,6 +3,7 @@ package automation_exercise.tests;
 import automation_exercise.BaseTest;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 import utils.TestData;
@@ -16,6 +17,7 @@ public class TC3_LoginUserWithIncorrectCredentials extends BaseTest {
             dataProvider = "invalidLoginDataProvider",
             dataProviderClass = TestData.class
     )
+    @Step("TC3: Login with invalid credentials")
     public void testLoginWithIncorrectCredentials(String email, String password, String expectedError) {
         // 1 & 2. Launch & Navigate
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
@@ -36,6 +38,6 @@ public class TC3_LoginUserWithIncorrectCredentials extends BaseTest {
         signupLoginPage.clickLoginButton();
 
         // 8. Verify the expected error message is visible
-        assertThat(page.locator("form[action='/login'] p")).hasText(expectedError);
+        assertThat(page.getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
     }
 }

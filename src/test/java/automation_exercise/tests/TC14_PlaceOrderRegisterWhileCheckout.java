@@ -1,6 +1,7 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 
@@ -9,6 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class TC14_PlaceOrderRegisterWhileCheckout extends BaseTest {
 
     @Test(description = "Test Case 14: Place Order: Register while Checkout",priority = 14)
+    @Step("TC14: Register while checkout and place order")
     public void placeOrderWithRegistration() {
         // 1-3. Launch and Verify Home Page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

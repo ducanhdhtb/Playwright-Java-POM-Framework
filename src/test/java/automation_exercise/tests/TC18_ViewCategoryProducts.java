@@ -1,6 +1,7 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 
@@ -9,6 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class TC18_ViewCategoryProducts extends BaseTest {
 
     @Test(description = "Test Case 18: View Category Products",priority = 18)
+    @Step("TC18: View category products")
     public void viewCategoryProducts() {
         // 1-3. Launch and Verify Home Page & Categories
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

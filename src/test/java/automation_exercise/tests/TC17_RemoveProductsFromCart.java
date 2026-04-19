@@ -1,6 +1,7 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 
@@ -9,6 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class TC17_RemoveProductsFromCart extends BaseTest {
 
     @Test(description = "Test Case 17: Remove Products From Cart",priority = 17)
+    @Step("TC17: Remove products from cart")
     public void removeProductsFromCart() {
         // 1-3. Launch and Verify Home Page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

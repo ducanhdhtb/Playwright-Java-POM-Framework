@@ -7,8 +7,7 @@ import io.qameta.allure.Step;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-public class CartPage {
-    private final Page page;
+public class CartPage extends BasePage {
 
     // Locators...
     private final String FOOTER = "#footer";
@@ -23,65 +22,65 @@ public class CartPage {
     private final String EMPTY_CART_MSG = "#empty_cart";
 
     public CartPage(Page page) {
-        this.page = page;
+        super(page);
     }
 
     @Step("Clicking 'Proceed To Checkout' button")
     public void clickProceedToCheckout() {
-        page.locator(PROCEED_TO_CHECKOUT_BTN).click();
+        locator(PROCEED_TO_CHECKOUT_BTN).click();
     }
 
     @Step("Clicking 'Register / Login' link on modal")
     public void clickRegisterLoginModal() {
-        page.locator(REGISTER_LOGIN_MODAL_LINK).click();
+        locator(REGISTER_LOGIN_MODAL_LINK).click();
     }
 
     @Step("Scrolling to footer on cart page")
     public void scrollToFooter() {
-        page.locator(FOOTER).scrollIntoViewIfNeeded();
+        locator(FOOTER).scrollIntoViewIfNeeded();
     }
 
     @Step("Subscribing with email: {0}")
     public void subscribe(String email) {
-        page.locator(SUBSCRIBE_EMAIL).fill(email);
-        page.locator(SUBSCRIBE_BUTTON).click();
+        locator(SUBSCRIBE_EMAIL).fill(email);
+        locator(SUBSCRIBE_BUTTON).click();
     }
 
     @Step("Clicking 'Proceed To Checkout'")
     public void proceedToCheckout() {
-        page.getByText("Proceed To Checkout").click();
+        byText("Proceed To Checkout").click();
     }
 
     @Step("Clicking 'Register / Login' on checkout modal")
     public void clickRegisterLoginOnModal() {
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Register / Login")).click();
+        byRole(AriaRole.LINK, "Register / Login").click();
     }
 
     @Step("Removing product at index {0} from cart")
     public void removeProductByIndex(int index) {
-        page.locator(DELETE_PRODUCT_BTN).nth(index).click();
+        locator(DELETE_PRODUCT_BTN).nth(index).click();
     }
 
     // VERIFICATIONS
     @Step("Verifying 'SUBSCRIPTION' title is visible")
     public void verifySubscriptionTitleIsVisible() {
-        assertThat(page.locator(SUBSCRIPTION_TITLE)).isVisible();
+        assertThat(locator(SUBSCRIPTION_TITLE)).isVisible();
     }
 
     @Step("Verifying subscription success message")
     public void verifySuccessMessage() {
-        assertThat(page.locator(SUCCESS_MESSAGE)).isVisible();
-        assertThat(page.locator(SUCCESS_MESSAGE)).hasText("You have been successfully subscribed!");
+        assertThat(locator(SUCCESS_MESSAGE)).isVisible();
+        assertThat(locator(SUCCESS_MESSAGE)).hasText("You have been successfully subscribed!");
     }
 
     @Step("Verifying cart contains {0} products")
     public void verifyCartCount(int expectedCount) {
-        assertThat(page.locator(CART_ROWS)).hasCount(expectedCount);
+        assertThat(locator(CART_ROWS)).hasCount(expectedCount);
     }
 
     @Step("Verifying product details in cart at row {0}: Price={1}, Quantity={2}, Total={3}")
     public void verifyProductDetails(int rowIndex, String price, String quantity, String total) {
-        Locator row = page.locator(CART_ROWS).nth(rowIndex);
+        Locator row = locator(CART_ROWS).nth(rowIndex);
         assertThat(row.locator(".cart_price")).hasText(price);
         assertThat(row.locator(".cart_quantity")).hasText(quantity);
         assertThat(row.locator(".cart_total")).hasText(total);
@@ -89,6 +88,6 @@ public class CartPage {
 
     @Step("Verifying product is removed from cart")
     public void verifyProductIsRemoved() {
-        assertThat(page.locator(EMPTY_CART_MSG)).isVisible();
+        assertThat(locator(EMPTY_CART_MSG)).isVisible();
     }
 }

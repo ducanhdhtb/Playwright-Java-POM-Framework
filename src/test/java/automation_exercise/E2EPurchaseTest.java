@@ -2,6 +2,7 @@ package automation_exercise;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
+import io.qameta.allure.Step;
 import utils.ConfigReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -9,6 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class E2EPurchaseTest extends BaseTest {
 
     @Test(description = "Full E2E test: Search, Add to Cart, Register, Checkout, and Delete Account")
+    @Step("E2E: search product, register, checkout, and delete account")
     public void testEndToEndProductOrderFlow() {
         // 1. Navigate to URL and go to the products page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

@@ -2,6 +2,7 @@ package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
 import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 
@@ -10,6 +11,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 public class TC8_VerifyProductDetailTest extends BaseTest {
 
     @Test(priority = 8)
+    @Step("TC8: Verify product detail page")
     public void testVerifyAllProductsAndDetail() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

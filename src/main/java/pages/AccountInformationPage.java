@@ -4,39 +4,38 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 
-public class AccountInformationPage {
-    private final Page page;
+public class AccountInformationPage extends BasePage {
 
     public AccountInformationPage(Page page) {
-        this.page = page;
+        super(page);
     }
 
     @Step("Filling account details with Password: [PROTECTED], DoB: {1}-{2}-{3}")
     public void fillAccountDetails(String password, String day, String month, String year) {
-        page.getByRole(AriaRole.RADIO, new Page.GetByRoleOptions().setName("Mr.")).check();
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Password *")).fill(password);
-        page.locator("#days").selectOption(day);
-        page.locator("#months").selectOption(month);
-        page.locator("#years").selectOption(year);
-        page.getByRole(AriaRole.CHECKBOX, new Page.GetByRoleOptions().setName("Sign up for our newsletter!")).check();
-        page.getByRole(AriaRole.CHECKBOX, new Page.GetByRoleOptions().setName("Receive special offers from")).check();
+        byRole(AriaRole.RADIO, "Mr.").check();
+        byRole(AriaRole.TEXTBOX, "Password *").fill(password);
+        locator("#days").selectOption(day);
+        locator("#months").selectOption(month);
+        locator("#years").selectOption(year);
+        byRole(AriaRole.CHECKBOX, "Sign up for our newsletter!").check();
+        byRole(AriaRole.CHECKBOX, "Receive special offers from").check();
     }
 
     @Step("Filling address details for {0} {1}")
     public void fillAddressDetails(String firstName, String lastName, String company, String address, String country, String state, String city, String zip, String mobile) {
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("First name *")).fill(firstName);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Last name *")).fill(lastName);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Company").setExact(true)).fill(company);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Address * (Street address, P.")).fill(address);
-        page.getByLabel("Country *").selectOption(country);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("State *")).fill(state);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("City *")).fill(city);
-        page.locator("#zipcode").fill(zip);
-        page.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName("Mobile Number *")).fill(mobile);
+        byRole(AriaRole.TEXTBOX, "First name *").fill(firstName);
+        byRole(AriaRole.TEXTBOX, "Last name *").fill(lastName);
+        byExactRole(AriaRole.TEXTBOX, "Company").fill(company);
+        byRole(AriaRole.TEXTBOX, "Address * (Street address, P.").fill(address);
+        byLabel("Country *").selectOption(country);
+        byRole(AriaRole.TEXTBOX, "State *").fill(state);
+        byRole(AriaRole.TEXTBOX, "City *").fill(city);
+        locator("#zipcode").fill(zip);
+        byRole(AriaRole.TEXTBOX, "Mobile Number *").fill(mobile);
     }
 
     @Step("Clicking 'Create Account' button")
     public void clickCreateAccount() {
-        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Create Account")).click();
+        byRole(AriaRole.BUTTON, "Create Account").click();
     }
 }

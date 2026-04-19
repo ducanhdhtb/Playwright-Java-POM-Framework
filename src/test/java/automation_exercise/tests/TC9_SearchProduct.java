@@ -1,6 +1,7 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
 import utils.TestData;
@@ -14,6 +15,7 @@ public class TC9_SearchProduct extends BaseTest {
             dataProvider = "productSearchDataProvider",
             dataProviderClass = TestData.class
     )
+    @Step("TC9: Search for products")
     public void searchProduct(String searchKey) {
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
         homePage.clickProducts();

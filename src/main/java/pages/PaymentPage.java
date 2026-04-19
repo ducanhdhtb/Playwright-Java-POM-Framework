@@ -1,25 +1,25 @@
 package pages;
 
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.AriaRole;
-import com.microsoft.playwright.Page.GetByRoleOptions; // Import trực tiếp option
+import io.qameta.allure.Step;
 
-public class PaymentPage {
-    private final Page page;
+public class PaymentPage extends BasePage {
 
     public PaymentPage(Page page) {
-        this.page = page;
+        super(page);
     }
 
+    @Step("Filling payment details for: {0}")
     public void fillPaymentDetails(String name, String cardNum, String cvc, String month, String year) {
-        page.locator("input[name='name_on_card']").fill(name);
-        page.locator("input[name='card_number']").fill(cardNum);
-        page.locator("input[name='cvc']").fill(cvc);
-        page.locator("input[name='expiry_month']").fill(month);
-        page.locator("input[name='expiry_year']").fill(year);
+        locator("input[data-qa='name-on-card']").fill(name);
+        locator("input[data-qa='card-number']").fill(cardNum);
+        locator("input[data-qa='cvc']").fill(cvc);
+        locator("input[data-qa='expiry-month']").fill(month);
+        locator("input[data-qa='expiry-year']").fill(year);
     }
 
+    @Step("Clicking 'Pay and Confirm Order' button")
     public void clickPayAndConfirm() {
-        page.getByRole(AriaRole.BUTTON, new GetByRoleOptions().setName("Pay and Confirm Order")).click();
+        locator("button[data-qa='pay-button']").click();
     }
 }

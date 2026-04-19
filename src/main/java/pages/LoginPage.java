@@ -1,25 +1,26 @@
 package pages;
 
 import com.microsoft.playwright.Page;
+import io.qameta.allure.Step;
 
-public class LoginPage {
-    private Page page;
-
+public class LoginPage extends BasePage {
     // 1. Locators
-    private String emailInput = "#email";
-    private String passwordInput = "#pass";
-    private String loginBtn = "button[name='login']";
+    private final String emailInput = "#email";
+    private final String passwordInput = "#pass";
+    private final String loginBtn = "button[name='login']";
 
     // 2. Constructor
     public LoginPage(Page page) {
-        this.page = page;
+        super(page);
     }
 
     // 3. Actions
+    @Step("Navigating to login URL: {0}")
     public void navigateToLogin(String url) {
-        page.navigate(url);
+        super.navigate(url);
     }
 
+    @Step("Logging in with email: {0}")
     public void login(String email, String pass) {
         page.fill(emailInput, email);
         page.fill(passwordInput, pass);

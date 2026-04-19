@@ -6,28 +6,27 @@ import com.microsoft.playwright.options.AriaRole;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class PracticePage {
+public class PracticePage extends BasePage {
     private static final Logger log = LogManager.getLogger(PracticePage.class);
-    private final Page page;
 
-    // 1. Khai báo Locators (Sử dụng các phương thức getBy của Playwright)
+    // 1. Khai báo Locators
     private final Locator nameInput;
     private final Locator maleRadio;
     private final Locator roleDropdown;
     private final Locator subscribeCheckbox;
     private final Locator submitBtn;
 
-    // 2. Constructor: Khởi tạo các Locator ngay khi object được tạo
+    // 2. Constructor
     public PracticePage(Page page) {
-        this.page = page;
+        super(page);
         this.nameInput = page.getByPlaceholder("Nhập tên của bạn");
-        this.maleRadio = page.locator("#male"); // Dùng locator ID vì radio này có thể thiếu label chuẩn
+        this.maleRadio = page.locator("#male");
         this.roleDropdown = page.getByLabel("Vai trò:");
         this.subscribeCheckbox = page.getByRole(AriaRole.CHECKBOX);
         this.submitBtn = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Gửi thông tin"));
     }
 
-    // 3. Các hành động (Actions)
+    // 3. Actions
     public void fillInformation(String name, String roleValue) {
         log.info("Nhập tên: {}", name);
         nameInput.fill(name);

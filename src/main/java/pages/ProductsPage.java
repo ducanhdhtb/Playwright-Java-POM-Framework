@@ -4,12 +4,10 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
-import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-public class ProductsPage {
-    private final Page page;
+public class ProductsPage extends BasePage {
 
     // Locators...
     private final String SEARCH_INPUT      = "input#search_product";
@@ -23,71 +21,81 @@ public class ProductsPage {
     private final String brandsSidebar = "//div[@class='brands_products']";
 
     public ProductsPage(Page page) {
-        this.page = page;
+        super(page);
     }
 
     @Step("Adding product at index {0} to cart")
     public void addProductToCartByIndex(int index) {
-        Locator product = page.locator(".single-products").nth(index);
+        Locator product = locator(".single-products").nth(index);
         product.hover();
         product.locator(".add-to-cart").first().click();
     }
 
     @Step("Searching for product: '{0}'")
     public void searchProduct(String productName) {
-        page.getByPlaceholder("Search Product").fill(productName);
-        page.locator(SEARCH_BUTTON).click();
+        byPlaceholder("Search Product").fill(productName);
+        locator(SEARCH_BUTTON).click();
     }
 
     @Step("Clicking 'Continue Shopping' button")
     public void clickContinueShopping() {
-        page.locator(CONTINUE_SHOPPING_BTN).click();
+        locator(CONTINUE_SHOPPING_BTN).click();
     }
 
     @Step("Adding the first product to cart")
     public void addFirstProductToCart() {
-        page.locator(PRODUCT_BOX).first().hover();
-        page.locator(ADD_TO_CART_BTN).first().click();
+        locator(PRODUCT_BOX).first().hover();
+        locator(ADD_TO_CART_BTN).first().click();
     }
 
     @Step("Clicking 'View Product' of the first item")
     public void clickViewProductOfFirstItem() {
-        page.locator(VIEW_PRODUCT_BTN).first().click();
+        locator(".features_items a[href*='/product_details/']").first().click();
+        waitForUrl("**/product_details/**");
     }
 
     @Step("Clicking 'View Cart' link")
     public void clickViewCart() {
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(VIEW_CART_LINK)).first().click();
+        byRole(AriaRole.LINK, VIEW_CART_LINK).first().click();
     }
 
     @Step("Clicking 'View Product' by index: {0}")
     public void clickViewProductByIndex(int index) {
-        page.locator(".choose a").nth(index).click();
+        locator(".features_items a[href*='/product_details/']").nth(index).click();
+        waitForUrl("**/product_details/**");
     }
 
     @Step("Selecting brand: {0}")
     public void selectBrand(String brandName) {
-        page.locator("//a[contains(text(),'" + brandName + "')]").click();
+        locator("//a[contains(text(),'" + brandName + "')]").click();
     }
 
     // VERIFICATIONS
     @Step("Verifying all product names contain keyword: '{0}'")
     public void verifyAllProductNamesContain(String keyword) {
-        Locator names = page.locator(PRODUCT_INFO_LIST);
+        Locator names = locator(PRODUCT_INFO_LIST);
         assertThat(names.first()).isVisible();
-        Pattern pattern = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
+        String normalizedKeyword = normalizeSearchText(keyword);
         for (Locator item : names.all()) {
-            assertThat(item).containsText(pattern);
+            String normalizedText = normalizeSearchText(item.innerText());
+            if (!normalizedText.contains(normalizedKeyword)) {
+                throw new AssertionError(
+                        "Expected product name to contain '" + keyword + "' but found '" + item.innerText() + "'");
+            }
         }
+    }
+
+    private String normalizeSearchText(String text) {
+        return text == null ? "" : text.replaceAll("[^\\p{Alnum}]", "").toLowerCase();
     }
 
     @Step("Verifying brands sidebar is visible")
     public void verifyBrandsVisible() {
-        assertThat(page.locator(brandsSidebar)).isVisible();
+        assertThat(locator(brandsSidebar)).isVisible();
     }
 
     @Step("Verifying brand page title is '{0}'")
     public void verifyBrandPage(String brandName) {
-        assertThat(page.locator("//h2[contains(text(),'" + brandName + "')]")).isVisible();
+        assertThat(locator("//h2[contains(text(),'" + brandName + "')]")).isVisible();
     }
 }
