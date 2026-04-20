@@ -121,6 +121,7 @@ public class BaseTest {
                 .setSources(true));
 
         page = context.newPage();
+        page.onDialog(dialog -> dialog.accept());
 
         homePage = new HomePage(page);
         signupLoginPage = new SignupLoginPage(page);

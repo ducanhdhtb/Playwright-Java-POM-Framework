@@ -38,7 +38,7 @@ public class TC6_ContactUsForm extends BaseTest {
         contactPage.clickSubmit();
 
         // 10. Verify success message is visible
-        assertThat(page.locator(".status.alert.alert-success"))
+        assertThat(page.locator("#contact-page .status.alert.alert-success"))
                 .isVisible();
 
         // 11. Click 'Home' button and verify landing

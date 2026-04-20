@@ -26,8 +26,7 @@ public class ContactUsPage extends BasePage {
 
     @Step("Clicking 'Submit' button and accepting alert")
     public void clickSubmit() {
-        page.onceDialog(dialog -> dialog.accept());
-        byRole(AriaRole.BUTTON, "Submit").click();
+        page.locator("input[data-qa='submit-button']").click();
     }
 
     @Step("Clicking 'Home' button from contact page")
