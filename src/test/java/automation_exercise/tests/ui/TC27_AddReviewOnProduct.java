@@ -32,7 +32,7 @@ public class TC27_AddReviewOnProduct extends BaseTest {
         productsPage.clickViewProductOfFirstItem();
 
         // 6. Verify 'Write Your Review' is visible
-        assertThat(page.locator("#review-section")).isVisible();
+        assertThat(page.locator("#review-form")).isVisible();
         assertThat(page.getByText("Write Your Review")).isVisible();
 
         // 7. Enter name, email and review

@@ -186,4 +186,21 @@ public class HomePage extends BasePage {
     public void scrollToTop() {
         page.evaluate("window.scrollTo(0, 0)");
     }
+
+    @Step("Verifying category '{0}' is visible in sidebar")
+    public void verifyCategoryInSidebar(String category) {
+        assertThat(locator(".panel-title a").filter(
+                new com.microsoft.playwright.Locator.FilterOptions().setHasText(category)
+        )).isVisible();
+    }
+
+    @Step("Expanding category '{0}' in sidebar")
+    public void expandCategory(String category) {
+        locator("a[href='#" + category + "']").click();
+    }
+
+    @Step("Clicking sub-category link '{0}'")
+    public void clickSubCategory(String href) {
+        locator("a[href='" + href + "']").click();
+    }
 }
