@@ -88,8 +88,8 @@ node {
   def suiteOverride = coalesceStr(params.TESTNG_SUITE, env.TESTNG_SUITE, '')
   def testngSuite = suiteOverride ? suiteOverride : suiteForProfile(profile)
 
-  def testGroups = coalesceStr(params.TEST_GROUPS, env.TEST_GROUPS, '')
-  def excludedGroups = coalesceStr(params.EXCLUDED_GROUPS, env.EXCLUDED_GROUPS, '')
+  def testGroups = coalesceStr(params.TEST_GROUPS, env.TEST_GROUPS) ?: ''
+  def excludedGroups = coalesceStr(params.EXCLUDED_GROUPS, env.EXCLUDED_GROUPS) ?: ''
   def playwrightHeadless = coalesceStr(params.PLAYWRIGHT_HEADLESS, env.PLAYWRIGHT_HEADLESS, 'true')
 
   boolean needsBrowser = !(testngSuite?.toLowerCase()?.contains('api'))
@@ -154,9 +154,23 @@ node {
 
     stage('Run Test') {
       echo "[Run Test] Start"
+      def mvnArgs = []
+      mvnArgs << "mvn -B clean test"
+      mvnArgs << "-Dplaywright.headless='${playwrightHeadless}'"
+      mvnArgs << "-Dtestng.suiteXmlFile='${testngSuite}'"
+      if (testGroups?.trim()) {
+        mvnArgs << "-Dtestng.groups='${testGroups}'"
+      }
+      if (excludedGroups?.trim()) {
+        mvnArgs << "-Dtestng.excludedGroups='${excludedGroups}'"
+      }
+
+      def mvnCmd = mvnArgs.join(' ')
+      echo "[Run Test] Command: ${mvnCmd}"
+
       // returnStatus keeps the pipeline running so we still publish reports + send email.
       testExitCode = sh(
-        script: "mvn -B clean test -Dplaywright.headless='${playwrightHeadless}' -Dtestng.suiteXmlFile='${testngSuite}' -Dtestng.groups='${testGroups}' -Dtestng.excludedGroups='${excludedGroups}'",
+        script: mvnCmd,
         returnStatus: true
       )
       if (testExitCode != 0) {
@@ -177,7 +191,8 @@ node {
     stage('Report') {
       echo "[Report] JUnit..."
       try {
-        junitSummary = junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+        // Surefire generates JUnit-style XML under junitreports/ when running TestNG.
+        junitSummary = junit allowEmptyResults: true, testResults: 'target/surefire-reports/junitreports/TEST-*.xml'
       } catch (Exception e) {
         echo "[Report] JUnit publish failed: ${e.getClass().getName()}: ${e.message}"
       }
@@ -232,7 +247,7 @@ node {
         "Profile: ${profile}\n" +
         "URL: ${env.BUILD_URL}\n" +
         "TestNGSuite: ${testngSuite}\n" +
-        "Groups: ${testGroups}\n" +
+        "GroupsOverride: ${testGroups ?: '<from suite xml>'}\n" +
         (excludedGroups ? ("ExcludedGroups: ${excludedGroups}\n") : "") +
         (total != null ? ("Tests: total=${total}, passed=${passed}, failed=${failedCount}, skipped=${skipped}\n") : "") +
         "InstallExitCode: ${installExitCode}\n" +
