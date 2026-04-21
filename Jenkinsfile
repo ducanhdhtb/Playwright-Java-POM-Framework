@@ -243,6 +243,31 @@ node {
       def allureUrl = env.BUILD_URL ? "${env.BUILD_URL}allure/" : ""
       def artifactsUrl = env.BUILD_URL ? "${env.BUILD_URL}artifact/" : ""
 
+      // List trace artifacts so recipients can download and open them in Playwright Trace Viewer.
+      def traceLinks = ""
+      try {
+        def traces = sh(
+          script: "ls -1 traces/*.zip 2>/dev/null | sort | tail -n 30",
+          returnStdout: true
+        ).trim()
+        if (traces) {
+          def lines = traces.split("\\r?\\n") as List
+          def sb = new StringBuilder()
+          sb.append("\\nTraces (download .zip):\\n")
+          for (String f : lines) {
+            // f is a relative path like traces/testName_123.zip
+            if (artifactsUrl) {
+              sb.append("- ").append(artifactsUrl).append(f).append("\\n")
+            } else {
+              sb.append("- ").append(f).append("\\n")
+            }
+          }
+          traceLinks = sb.toString()
+        }
+      } catch (Exception e) {
+        echo "[Notify] Trace list failed: ${e.getClass().getName()}: ${e.message}"
+      }
+
       def body =
         "Result: ${result}\n" +
         "Job: ${env.JOB_NAME}\n" +
@@ -258,7 +283,8 @@ node {
         "TestExitCode: ${testExitCode}\n" +
         (allureUrl ? ("Allure: ${allureUrl}\n") : "") +
         (artifactsUrl ? ("Artifacts: ${artifactsUrl}\n") : "") +
-        (failDetails ? ("\nDetails:\n" + failDetails) : "")
+        (failDetails ? ("\nDetails:\n" + failDetails) : "") +
+        (traceLinks ?: "")
 
       sendBuildEmail(emailTo, subject, body)
     }
