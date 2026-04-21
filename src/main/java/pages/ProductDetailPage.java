@@ -40,6 +40,28 @@ public class ProductDetailPage {
         page.locator(ADD_TO_CART_BTN).click();
     }
 
+    @Step("Getting review section locator")
+    public Locator reviewSection() {
+        return page.locator("#review-section, .write-review, #review-form");
+    }
+
+    @Step("Writing a review with name '{0}', email '{1}'")
+    public void writeReview(String name, String email, String review) {
+        page.locator("#name").fill(name);
+        page.locator("#email").fill(email);
+        page.locator("#review").fill(review);
+    }
+
+    @Step("Submitting the review")
+    public void submitReview() {
+        page.locator("#button-review").click();
+    }
+
+    @Step("Verifying review success message")
+    public void verifyReviewSuccess() {
+        assertThat(page.locator(".alert-success")).containsText("Thank you for your review.");
+    }
+
     // VERIFICATIONS
     @Step("Verifying product details are visible")
     public void verifyProductDetailsVisible() {

@@ -145,4 +145,93 @@ public class UserApiHelper {
     public static String defaultPassword() {
         return ConfigReader.getProperty("test.defaultPassword", "Password123");
     }
+
+    // ── Additional API endpoints ──────────────────────────────────────────────
+
+    /**
+     * GET /api/productsList — get all products
+     */
+    @Step("API: Get all products list")
+    public ApiResponse getAllProducts() {
+        return new ApiResponse(client.get("/api/productsList"));
+    }
+
+    /**
+     * POST /api/productsList — should return 405
+     */
+    @Step("API: POST to products list (expect 405)")
+    public ApiResponse postToProductsList() {
+        return new ApiResponse(client.postForm("/api/productsList", Map.of()));
+    }
+
+    /**
+     * GET /api/brandsList — get all brands
+     */
+    @Step("API: Get all brands list")
+    public ApiResponse getAllBrands() {
+        return new ApiResponse(client.get("/api/brandsList"));
+    }
+
+    /**
+     * PUT /api/brandsList — should return 405
+     */
+    @Step("API: PUT to brands list (expect 405)")
+    public ApiResponse putToBrandsList() {
+        return new ApiResponse(client.putForm("/api/brandsList", Map.of()));
+    }
+
+    /**
+     * POST /api/searchProduct — search by keyword
+     */
+    @Step("API: Search product with keyword '{0}'")
+    public ApiResponse searchProduct(String keyword) {
+        return new ApiResponse(client.postForm("/api/searchProduct",
+                Map.of("search_product", keyword)));
+    }
+
+    /**
+     * POST /api/searchProduct — without search_product param → 400
+     */
+    @Step("API: Search product without parameter (expect 400)")
+    public ApiResponse searchProductWithoutParam() {
+        return new ApiResponse(client.postForm("/api/searchProduct", Map.of()));
+    }
+
+    /**
+     * DELETE /api/verifyLogin — should return 405
+     */
+    @Step("API: DELETE to verifyLogin (expect 405)")
+    public ApiResponse deleteVerifyLogin() {
+        return new ApiResponse(client.deleteForm("/api/verifyLogin", Map.of()));
+    }
+
+    /**
+     * PUT /api/updateAccount — update user details
+     */
+    @Step("API: Update user account for email '{1}'")
+    public ApiResponse updateUser(String name, String email, String password,
+                                  String title, String birthDate, String birthMonth, String birthYear,
+                                  String firstName, String lastName, String company,
+                                  String address1, String address2, String country,
+                                  String zipcode, String state, String city, String mobileNumber) {
+        Map<String, String> form = new LinkedHashMap<>();
+        form.put("name", name);
+        form.put("email", email);
+        form.put("password", password);
+        form.put("title", title);
+        form.put("birth_date", birthDate);
+        form.put("birth_month", birthMonth);
+        form.put("birth_year", birthYear);
+        form.put("firstname", firstName);
+        form.put("lastname", lastName);
+        form.put("company", company);
+        form.put("address1", address1);
+        form.put("address2", address2);
+        form.put("country", country);
+        form.put("zipcode", zipcode);
+        form.put("state", state);
+        form.put("city", city);
+        form.put("mobile_number", mobileNumber);
+        return new ApiResponse(client.putForm("/api/updateAccount", form));
+    }
 }

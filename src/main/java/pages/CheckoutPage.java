@@ -51,4 +51,24 @@ public class CheckoutPage extends BasePage {
     public void verifyOrderSuccess() {
         assertThat(locator(SUCCESS_MESSAGE)).isVisible();
     }
+
+    @Step("Verifying delivery address contains '{0}'")
+    public void verifyDeliveryAddress(String expectedText) {
+        assertThat(locator("#address_delivery")).containsText(expectedText);
+    }
+
+    @Step("Verifying billing address contains '{0}'")
+    public void verifyBillingAddress(String expectedText) {
+        assertThat(locator("#address_invoice")).containsText(expectedText);
+    }
+
+    @Step("Clicking 'Download Invoice' button")
+    public void clickDownloadInvoice() {
+        locator("a.btn.btn-default.check_out").click();
+    }
+
+    @Step("Verifying 'Download Invoice' button is visible")
+    public void verifyDownloadInvoiceVisible() {
+        assertThat(locator("a.btn.btn-default.check_out")).isVisible();
+    }
 }

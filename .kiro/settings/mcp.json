@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "/Users/mac/.npm-global/bin/playwright-mcp-server",
+      "args": [],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "playwright_navigate",
+        "playwright_screenshot",
+        "playwright_click",
+        "playwright_fill",
+        "playwright_get_visible_text",
+        "playwright_get_visible_html",
+        "playwright_evaluate"
+      ]
+    }
+  }
+}

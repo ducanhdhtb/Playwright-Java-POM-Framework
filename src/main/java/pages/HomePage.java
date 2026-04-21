@@ -156,4 +156,34 @@ public class HomePage extends BasePage {
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(expectedTitle, java.util.regex.Pattern.CASE_INSENSITIVE);
         assertThat(locator(CATEGORY_TITLE)).containsText(pattern);
     }
+
+    @Step("Scrolling to bottom of page")
+    public void scrollToBottom() {
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)");
+    }
+
+    @Step("Clicking scroll-up arrow button")
+    public void clickScrollUpArrow() {
+        locator("#scrollUp").click();
+    }
+
+    @Step("Verifying hero text '{0}' is visible")
+    public void verifyHeroText(String text) {
+        assertThat(locator(".item.active h2")).containsText(text);
+    }
+
+    @Step("Verifying RECOMMENDED ITEMS section is visible")
+    public void verifyRecommendedItemsVisible() {
+        assertThat(locator(".recommended_items")).isVisible();
+    }
+
+    @Step("Adding first recommended item to cart")
+    public void addFirstRecommendedItemToCart() {
+        locator(".recommended_items .add-to-cart").first().click();
+    }
+
+    @Step("Scrolling up page manually (no arrow button)")
+    public void scrollToTop() {
+        page.evaluate("window.scrollTo(0, 0)");
+    }
 }

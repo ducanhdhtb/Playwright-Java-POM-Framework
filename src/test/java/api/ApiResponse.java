@@ -33,10 +33,25 @@ public class ApiResponse {
     /** Parse response body as JSON and return the root node. */
     public JsonNode json() {
         if (jsonBody == null) {
-            try {
-                jsonBody = MAPPER.readTree(raw.body());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse API response as JSON: " + raw.text(), e);
+            String body = raw.text();
+            // Server có thể trả HTML khi bị overload (503, 429...) — wrap thành JSON error node
+            if (body == null || body.isBlank() || body.trim().startsWith("<")) {
+                try {
+                    jsonBody = MAPPER.readTree(
+                            "{\"responseCode\":" + raw.status()
+                            + ",\"message\":\"Server returned non-JSON response (HTTP "
+                            + raw.status() + "): " + body.replace("\"", "'").replaceAll("\\s+", " ").trim() + "\"}");
+                } catch (Exception e) {
+                    throw new RuntimeException("Server returned non-JSON body (HTTP "
+                            + raw.status() + "): " + body);
+                }
+            } else {
+                try {
+                    jsonBody = MAPPER.readTree(body);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to parse API response as JSON (HTTP "
+                            + raw.status() + "): " + body, e);
+                }
             }
         }
         return jsonBody;
