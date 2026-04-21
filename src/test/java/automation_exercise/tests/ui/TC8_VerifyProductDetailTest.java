@@ -1,4 +1,4 @@
-package automation_exercise.tests;
+package automation_exercise.tests.ui;
 
 import automation_exercise.BaseTest;
 import com.microsoft.playwright.options.AriaRole;

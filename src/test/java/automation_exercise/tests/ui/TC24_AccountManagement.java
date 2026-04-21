@@ -1,4 +1,4 @@
-package automation_exercise.tests;
+package automation_exercise.tests.ui;
 
 import api.ApiResponse;
 import automation_exercise.BaseTest;

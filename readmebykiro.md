@@ -34,20 +34,22 @@ Playwright-Java-POM-Framework/
 │       │   └── UserApiHelper.java     # User CRUD operations
 │       │
 │       ├── automation_exercise/
-│       │   ├── BaseTest.java          # Base class cho tất cả tests (có apiClient + userApi)
-│       │   ├── E2EPurchaseTest.java   # E2E test hiện có
+│       │   ├── BaseTest.java          # Base UI class (Playwright browser)
+│       │   ├── BaseApiTest.java       # Base API-only class (no browser)
 │       │   │
 │       │   └── tests/
-│       │       ├── TC1_RegisterUser.java
-│       │       ├── TC2_LoginUserWithCorrectCredentials.java
-│       │       ├── ...
-│       │       ├── TC20_LoginWithApiCreatedUser.java      # ✨ MỚI: API-backed UI test
-│       │       ├── TC21_NegativeLoginTests.java           # ✨ MỚI: Negative scenarios
-│       │       ├── TC22_ProductSearchAndFilter.java       # ✨ MỚI: Search tests
-│       │       ├── TC23_CartManagement.java               # ✨ MỚI: Cart tests
-│       │       ├── TC24_AccountManagement.java            # ✨ MỚI: Account tests
+│       │       ├── ui/                                   # UI Tests
+│       │       │   ├── E2EPurchaseTest.java
+│       │       │   ├── TC1_RegisterUser.java
+│       │       │   ├── TC2_LoginUserWithCorrectCredentials.java
+│       │       │   ├── ...
+│       │       │   ├── TC20_LoginWithApiCreatedUser.java  # API-backed UI test
+│       │       │   ├── TC21_NegativeLoginTests.java       # Negative scenarios
+│       │       │   ├── TC22_ProductSearchAndFilter.java   # Search tests
+│       │       │   ├── TC23_CartManagement.java           # Cart tests
+│       │       │   └── TC24_AccountManagement.java        # Account tests
 │       │       │
-│       │       └── api/                                   # ✨ API Tests (MỚI)
+│       │       └── api/                                  # API Tests
 │       │           ├── TC_API01_CreateUserAccount.java
 │       │           ├── TC_API02_VerifyLogin.java
 │       │           ├── TC_API03_GetUserDetails.java
@@ -356,7 +358,7 @@ public void testLoginWithApiCreatedUser() {
 | `TC_API03` | Get user details: found (200), not found (404) | `api`, `smoke` |
 | `TC_API04` | Delete user: success (200), not found (404) | `api`, `smoke` |
 
-### UI Tests Mới (`automation_exercise.tests`)
+### UI Tests Mới (`automation_exercise.tests.ui`)
 
 | Test | Covers | Groups |
 |------|--------|--------|

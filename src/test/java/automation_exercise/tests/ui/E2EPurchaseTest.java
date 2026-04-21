@@ -1,4 +1,4 @@
-package automation_exercise;
+package automation_exercise.tests.ui;
 
 import automation_exercise.BaseTest;
 import org.testng.annotations.Test;

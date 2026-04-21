@@ -8,8 +8,7 @@
   </listeners>
   <test name="All Tests (Parallel)">
     <packages>
-      <package name="automation_exercise"/>
-      <package name="automation_exercise.tests"/>
+      <package name="automation_exercise.tests.ui"/>
       <package name="automation_exercise.tests.api"/>
     </packages>
   </test>

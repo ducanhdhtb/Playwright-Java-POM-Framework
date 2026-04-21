@@ -20,8 +20,10 @@ Dự án này là framework automation dùng **Playwright Java + TestNG**, theo 
 
 ```text
 src/main/java/pages/                     # Page Objects
-src/test/java/automation_exercise/        # BaseTest + E2E tests
-src/test/java/automation_exercise/tests/  # Test cases (TC*)
+src/test/java/automation_exercise/        # BaseTest/BaseApiTest
+src/test/java/automation_exercise/tests/ui/   # UI test cases (TC* + E2E)
+src/test/java/automation_exercise/tests/api/  # API test cases (TC_API*)
+src/test/java/api/                        # API client + helpers (Playwright APIRequestContext)
 src/test/java/utils/                      # Config, listeners, Excel helpers
 
 src/test/resources/
