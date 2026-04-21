@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Regression suite (excludes e2e). Use with: mvn test -Dtestng.suiteXmlFile=testng-regression.xml -->
+<suite name="Regression Suite" verbose="1" parallel="none" thread-count="1">
+  <listeners>
+    <listener class-name="utils.TestListener"/>
+    <listener class-name="utils.RetryTransformer"/>
+  </listeners>
+
+  <test name="Regression">
+    <groups>
+      <run>
+        <include name="regression"/>
+        <exclude name="e2e"/>
+      </run>
+    </groups>
+    <packages>
+      <package name="automation_exercise.tests.ui"/>
+      <package name="automation_exercise.tests.api"/>
+    </packages>
+  </test>
+</suite>
+

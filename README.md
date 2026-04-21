@@ -73,16 +73,25 @@ mvn clean install -DskipTests
 mvn clean test
 
 # Chạy smoke (nhanh)
-mvn test -Dtestng.groups=smoke
+mvn test -Dtestng.suiteXmlFile=testng-smoke.xml
+# hoặc (cách cũ)
+# mvn test -Dtestng.groups=smoke
 
 # Chạy regression
-mvn test -Dtestng.groups=regression
+mvn test -Dtestng.suiteXmlFile=testng-regression.xml
+# hoặc (cách cũ)
+# mvn test -Dtestng.groups=regression
 
 # Chạy e2e
-mvn test -Dtestng.groups=e2e
+mvn test -Dtestng.suiteXmlFile=testng-e2e.xml
+# hoặc (cách cũ)
+# mvn test -Dtestng.groups=e2e
 
 # Chạy song song (TestNG suite riêng)
 mvn test -Dtestng.suiteXmlFile=testng-parallel.xml
+
+# Chạy API-only (không browser)
+mvn test -Dtestng.suiteXmlFile=testng-api.xml
 
 # Sinh báo cáo Allure và mở trên trình duyệt
 mvn allure:serve
