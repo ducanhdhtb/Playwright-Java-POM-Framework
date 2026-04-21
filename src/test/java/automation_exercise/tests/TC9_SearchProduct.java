@@ -12,7 +12,7 @@ public class TC9_SearchProduct extends BaseTest {
 
     @Test(
             priority = 9,
-            dataProvider = "productSearchDataProvider",
+            dataProvider = "tc9DataProvider",
             dataProviderClass = TestData.class
     )
     @Step("TC9: Search for products")

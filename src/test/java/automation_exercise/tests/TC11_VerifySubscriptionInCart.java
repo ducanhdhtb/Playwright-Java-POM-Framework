@@ -13,7 +13,7 @@ public class TC11_VerifySubscriptionInCart extends BaseTest {
     @Test(
             description = "Test Case 11: Verify Subscription in Cart page",
             priority = 11,
-            dataProvider = "subscriptionCartDataProvider",
+            dataProvider = "tc11DataProvider",
             dataProviderClass = TestData.class
     )
     @Step("TC11: Verify subscription on cart page")

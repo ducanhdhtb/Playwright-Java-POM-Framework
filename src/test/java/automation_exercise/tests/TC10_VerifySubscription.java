@@ -12,7 +12,7 @@ public class TC10_VerifySubscription extends BaseTest {
 
     @Test(
             priority = 10,
-            dataProvider = "subscriptionHomeDataProvider",
+            dataProvider = "tc10DataProvider",
             dataProviderClass = TestData.class
     )
     @Step("TC10: Verify subscription on home page")

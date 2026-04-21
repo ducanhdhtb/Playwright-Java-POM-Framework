@@ -15,7 +15,7 @@ public class TC6_ContactUsForm extends BaseTest {
 
 	    @Test(
                 priority = 6,
-                dataProvider = "contactUsDataProvider",
+                dataProvider = "tc6DataProvider",
                 dataProviderClass = TestData.class
         )
 	    @Step("TC6: Submit the contact us form")

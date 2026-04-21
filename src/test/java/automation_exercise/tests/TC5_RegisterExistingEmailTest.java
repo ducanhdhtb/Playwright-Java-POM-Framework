@@ -14,16 +14,16 @@ public class TC5_RegisterExistingEmailTest extends BaseTest {
 
     @Test(
             priority = 5,
-            dataProvider = "existingEmailRegistrationDataProvider",
+            dataProvider = "tc5DataProvider",
             dataProviderClass = TestData.class
     )
     @Step("TC5: Register with an existing email")
-    public void testRegisterWithExistingEmail(String name, String email, String expectedError) {
+    public void testRegisterWithExistingEmail(String name, String password, String expectedError) {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // Ensure the email is actually "existing" by creating a fresh user first.
-        String existingEmail = createLoggedInUser(name, ConfigReader.getProperty("test.defaultPassword", "Password123"));
+        String existingEmail = createLoggedInUser(name, password);
         homePage.clickLogout();
 
         // After logout the site lands on the Signup/Login page; go back to home for this TC's flow.

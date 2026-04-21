@@ -14,7 +14,7 @@ public class TC1_RegisterUser extends BaseTest {
 
     @Test(
             priority = 1,
-            dataProvider = "newUserRegistrationDataProvider",
+            dataProvider = "tc1DataProvider",
             dataProviderClass = TestData.class
     )
     @Step("TC1: Register a new user")
