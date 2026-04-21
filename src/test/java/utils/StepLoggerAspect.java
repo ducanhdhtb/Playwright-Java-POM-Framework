@@ -108,6 +108,9 @@ public class StepLoggerAspect {
                 Page page = resolvePage(joinPoint.getThis());
                 if (page != null) {
                     try {
+                        if (page.isClosed()) {
+                            return result;
+                        }
                         byte[] png = page.screenshot(new Page.ScreenshotOptions()
                                 .setFullPage(fullPageScreenshotsEnabled()));
                         Allure.addAttachment(
@@ -117,7 +120,13 @@ public class StepLoggerAspect {
                                 ".png"
                         );
                     } catch (Exception e) {
-                        logger.warn("Failed to capture step screenshot: " + e.getMessage());
+                        // When teardown runs, the page/context can be closed; don't spam logs in that case.
+                        String msg = e.getMessage() == null ? "" : e.getMessage();
+                        if (msg.toLowerCase().contains("has been closed") || msg.toLowerCase().contains("target page")) {
+                            logger.debug("Step screenshot skipped (page closed): " + msg);
+                        } else {
+                            logger.warn("Failed to capture step screenshot: " + msg);
+                        }
                     }
                 }
             }

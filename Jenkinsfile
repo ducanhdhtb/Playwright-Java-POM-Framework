@@ -72,7 +72,8 @@ properties([
     string(name: 'TESTNG_SUITE', defaultValue: '', description: "Override suite file (e.g. testng-smoke.xml). Blank = use RUN_PROFILE default."),
     string(name: 'TEST_GROUPS', defaultValue: '', description: "Optional override: TestNG groups (e.g. smoke). Usually leave blank when using suite files."),
     string(name: 'EXCLUDED_GROUPS', defaultValue: '', description: "Optional override: excluded groups."),
-    string(name: 'PLAYWRIGHT_HEADLESS', defaultValue: 'true', description: "true/false. CI should be true.")
+    string(name: 'PLAYWRIGHT_HEADLESS', defaultValue: 'true', description: "true/false. CI should be true."),
+    string(name: 'PLAYWRIGHT_SLOWMO_MS', defaultValue: '0', description: "Playwright slow motion in ms (0 disables).")
   ])
 ])
 
@@ -91,6 +92,7 @@ node {
   def testGroups = coalesceStr(params.TEST_GROUPS, env.TEST_GROUPS) ?: ''
   def excludedGroups = coalesceStr(params.EXCLUDED_GROUPS, env.EXCLUDED_GROUPS) ?: ''
   def playwrightHeadless = coalesceStr(params.PLAYWRIGHT_HEADLESS, env.PLAYWRIGHT_HEADLESS, 'true')
+  def playwrightSlowMoMs = coalesceStr(params.PLAYWRIGHT_SLOWMO_MS, env.PLAYWRIGHT_SLOWMO_MS, '0')
 
   boolean needsBrowser = !(testngSuite?.toLowerCase()?.contains('api'))
   int installExitCode = 0
@@ -115,6 +117,7 @@ node {
       echo "[Init] Suite: ${testngSuite}"
       echo "[Init] Groups override: '${testGroups}', Excluded override: '${excludedGroups}'"
       echo "[Init] Headless: ${playwrightHeadless}"
+      echo "[Init] SlowMoMs: ${playwrightSlowMoMs}"
     }
 
     stage('Checkout') {
@@ -157,6 +160,7 @@ node {
       def mvnArgs = []
       mvnArgs << "mvn -B clean test"
       mvnArgs << "-Dplaywright.headless='${playwrightHeadless}'"
+      mvnArgs << "-Dplaywright.slowMoMs='${playwrightSlowMoMs}'"
       mvnArgs << "-Dtestng.suiteXmlFile='${testngSuite}'"
       if (testGroups?.trim()) {
         mvnArgs << "-Dtestng.groups='${testGroups}'"
