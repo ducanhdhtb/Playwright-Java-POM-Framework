@@ -11,6 +11,10 @@ public abstract class BasePage {
         this.page = page;
     }
 
+    public Page getPage() {
+        return page;
+    }
+
     protected Locator locator(String selector) {
         return page.locator(selector);
     }

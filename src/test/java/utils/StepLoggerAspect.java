@@ -1,5 +1,6 @@
 package utils;
 
+import com.microsoft.playwright.Page;
 import io.qameta.allure.Step;
 import io.qameta.allure.Allure;
 import org.apache.logging.log4j.LogManager;
@@ -10,13 +11,45 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
-import java.util.StringJoiner;
 
 @Aspect
 public class StepLoggerAspect {
 
     private static final Logger logger = LogManager.getLogger(StepLoggerAspect.class);
+
+    private static boolean stepScreenshotsEnabled() {
+        String fromProp = System.getProperty("ALLURE_STEP_SCREENSHOTS");
+        if (fromProp != null) {
+            return Boolean.parseBoolean(fromProp);
+        }
+        String fromEnv = System.getenv("ALLURE_STEP_SCREENSHOTS");
+        return fromEnv != null && Boolean.parseBoolean(fromEnv);
+    }
+
+    private static boolean fullPageScreenshotsEnabled() {
+        String fromProp = System.getProperty("ALLURE_STEP_SCREENSHOTS_FULLPAGE");
+        if (fromProp != null) {
+            return Boolean.parseBoolean(fromProp);
+        }
+        String fromEnv = System.getenv("ALLURE_STEP_SCREENSHOTS_FULLPAGE");
+        return fromEnv != null && Boolean.parseBoolean(fromEnv);
+    }
+
+    private static Page resolvePage(Object target) {
+        if (target == null) {
+            return null;
+        }
+        try {
+            // Works for BaseTest (already has getPage()) and for pages.BasePage (we added getPage()).
+            Method getPage = target.getClass().getMethod("getPage");
+            Object result = getPage.invoke(target);
+            return (result instanceof Page) ? (Page) result : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
 
     /**
      * Defines a pointcut that matches the execution of any method annotated with @Step.
@@ -60,6 +93,28 @@ public class StepLoggerAspect {
         logger.info("STEP: " + stepDescription);
 
         // Create a real Allure step without relying on Allure's AspectJ aspects.
-        return Allure.step(stepDescription, (Allure.ThrowableRunnable<Object>) joinPoint::proceed);
+        return Allure.step(stepDescription, (Allure.ThrowableRunnable<Object>) () -> {
+            Object result = joinPoint.proceed();
+
+            if (stepScreenshotsEnabled()) {
+                Page page = resolvePage(joinPoint.getThis());
+                if (page != null) {
+                    try {
+                        byte[] png = page.screenshot(new Page.ScreenshotOptions()
+                                .setFullPage(fullPageScreenshotsEnabled()));
+                        Allure.addAttachment(
+                                "Screenshot",
+                                "image/png",
+                                new ByteArrayInputStream(png),
+                                ".png"
+                        );
+                    } catch (Exception e) {
+                        logger.warn("Failed to capture step screenshot: " + e.getMessage());
+                    }
+                }
+            }
+
+            return result;
+        });
     }
 }
