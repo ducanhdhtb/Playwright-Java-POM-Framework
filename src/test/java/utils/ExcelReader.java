@@ -5,7 +5,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExcelReader {
 
@@ -17,33 +18,55 @@ public class ExcelReader {
      * @return A 2D Object array containing the data from the sheet.
      */
     public static Object[][] getTestData(String filePath, String sheetName) {
-        Object[][] data = null;
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet sheet = workbook.getSheet(sheetName);
             if (sheet == null) {
-                throw new RuntimeException("Sheet with name '" + sheetName + "' does not exist in the Excel file.");
+                throw new IllegalArgumentException(
+                        "Sheet '" + sheetName + "' does not exist in Excel file: " + filePath);
             }
 
-            int rowCount = sheet.getPhysicalNumberOfRows();
-            int colCount = sheet.getRow(0).getLastCellNum();
+            Row header = sheet.getRow(0);
+            if (header == null) {
+                throw new IllegalStateException("Sheet '" + sheetName + "' is missing header row (row 0).");
+            }
 
-            // Create a 2D array, ignoring the header row for data
-            data = new Object[rowCount - 1][colCount];
+            int colCount = header.getLastCellNum();
+            if (colCount <= 0) {
+                throw new IllegalStateException("Sheet '" + sheetName + "' has no columns in header row.");
+            }
 
-            for (int i = 1; i < rowCount; i++) { // Start from 1 to skip header
+            DataFormatter formatter = new DataFormatter();
+            List<Object[]> rows = new ArrayList<>();
+
+            int lastRow = sheet.getLastRowNum();
+            for (int i = 1; i <= lastRow; i++) { // Start from 1 to skip header
                 Row row = sheet.getRow(i);
+                if (row == null) {
+                    continue;
+                }
+
+                Object[] values = new Object[colCount];
+                boolean allBlank = true;
                 for (int j = 0; j < colCount; j++) {
-                    Cell cell = row.getCell(j);
-                    DataFormatter formatter = new DataFormatter();
-                    // Format cell value to String to avoid type issues
-                    data[i - 1][j] = formatter.formatCellValue(cell);
+                    Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    String v = formatter.formatCellValue(cell);
+                    values[j] = v;
+                    if (v != null && !v.isBlank()) {
+                        allBlank = false;
+                    }
+                }
+
+                // Skip empty rows so we don't feed blank datasets into tests.
+                if (!allBlank) {
+                    rows.add(values);
                 }
             }
+
+            return rows.toArray(new Object[0][0]);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to read Excel test data: " + filePath + " sheet=" + sheetName, e);
         }
-        return data;
     }
 }

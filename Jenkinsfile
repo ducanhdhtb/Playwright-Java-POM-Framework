@@ -27,6 +27,7 @@ node {
   def testGroups = (env.TEST_GROUPS?.trim()) ? env.TEST_GROUPS.trim() : 'smoke'
   def excludedGroups = (env.EXCLUDED_GROUPS?.trim()) ? env.EXCLUDED_GROUPS.trim() : ''
   def testngSuite = (env.TESTNG_SUITE?.trim()) ? env.TESTNG_SUITE.trim() : 'testng.xml'
+  def playwrightHeadless = (env.PLAYWRIGHT_HEADLESS?.trim()) ? env.PLAYWRIGHT_HEADLESS.trim() : 'true'
   int installExitCode = 0
   int testExitCode = 0
   boolean failed = false
@@ -81,7 +82,7 @@ node {
       echo "[Run Test] Start"
       // returnStatus keeps the pipeline running so we still publish reports + send email.
       testExitCode = sh(
-        script: "mvn -B clean test -Dtestng.suiteXmlFile='${testngSuite}' -Dtestng.groups='${testGroups}' -Dtestng.excludedGroups='${excludedGroups}'",
+        script: "mvn -B clean test -Dplaywright.headless='${playwrightHeadless}' -Dtestng.suiteXmlFile='${testngSuite}' -Dtestng.groups='${testGroups}' -Dtestng.excludedGroups='${excludedGroups}'",
         returnStatus: true
       )
       if (testExitCode != 0) {
