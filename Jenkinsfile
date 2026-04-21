@@ -18,16 +18,81 @@ def sendBuildEmail(String to, String subject, String body) {
   }
 }
 
+def coalesceStr(Object... values) {
+  for (v in values) {
+    if (v == null) continue
+    def s = String.valueOf(v).trim()
+    if (s) return s
+  }
+  return null
+}
+
+def scheduledProfile() {
+  // Jenkins uses the controller timezone. Force a stable schedule reference (Vietnam time).
+  def tz = TimeZone.getTimeZone('Asia/Ho_Chi_Minh')
+  def cal = Calendar.getInstance(tz)
+  cal.setTime(new Date())
+  int hour = cal.get(Calendar.HOUR_OF_DAY)
+  int dow = cal.get(Calendar.DAY_OF_WEEK) // 1=Sun, 2=Mon, ... 7=Sat
+
+  // Suggested default schedule (AUTO):
+  // - 01:00 Mon-Fri: API-only
+  // - 02:00 Mon-Fri: Regression (exclude e2e)
+  // - 03:00 Mon-Fri: E2E
+  // - Other hours: Smoke
+  boolean weekday = (dow >= Calendar.MONDAY && dow <= Calendar.FRIDAY)
+  if (weekday && hour == 1) return 'API'
+  if (weekday && hour == 2) return 'REGRESSION'
+  if (weekday && hour == 3) return 'E2E'
+  return 'SMOKE'
+}
+
+def suiteForProfile(String profile) {
+  switch (profile?.trim()?.toUpperCase()) {
+    case 'API': return 'testng-api.xml'
+    case 'REGRESSION': return 'testng-regression.xml'
+    case 'E2E': return 'testng-e2e.xml'
+    case 'SMOKE': return 'testng-smoke.xml'
+    default: return 'testng-smoke.xml'
+  }
+}
+
+// Hourly cron trigger. For per-profile cron with parameters, you'd need the "Parameterized Scheduler" plugin.
+properties([
+  disableConcurrentBuilds(),
+  pipelineTriggers([cron('H * * * *')]),
+  parameters([
+    choice(
+      name: 'RUN_PROFILE',
+      choices: ['AUTO', 'SMOKE', 'REGRESSION', 'E2E', 'API'].join('\n'),
+      description: "AUTO uses schedule (Asia/Ho_Chi_Minh): 01:00 API, 02:00 Regression, 03:00 E2E, else Smoke."
+    ),
+    string(name: 'BRANCH_NAME', defaultValue: 'dev_jenkin', description: 'Git branch to run'),
+    string(name: 'EMAIL_TO', defaultValue: 'ducanhdhtb@gmail.com', description: 'Email recipients'),
+    string(name: 'TESTNG_SUITE', defaultValue: '', description: "Override suite file (e.g. testng-smoke.xml). Blank = use RUN_PROFILE default."),
+    string(name: 'TEST_GROUPS', defaultValue: '', description: "Optional override: TestNG groups (e.g. smoke). Usually leave blank when using suite files."),
+    string(name: 'EXCLUDED_GROUPS', defaultValue: '', description: "Optional override: excluded groups."),
+    string(name: 'PLAYWRIGHT_HEADLESS', defaultValue: 'true', description: "true/false. CI should be true.")
+  ])
+])
+
 node {
 
   // Config
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
-  def branchName = env.BRANCH_NAME ?: 'dev_jenkin'
-  def emailTo = (env.EMAIL_TO?.trim()) ? env.EMAIL_TO.trim() : 'ducanhdhtb@gmail.com'
-  def testGroups = (env.TEST_GROUPS?.trim()) ? env.TEST_GROUPS.trim() : 'smoke'
-  def excludedGroups = (env.EXCLUDED_GROUPS?.trim()) ? env.EXCLUDED_GROUPS.trim() : ''
-  def testngSuite = (env.TESTNG_SUITE?.trim()) ? env.TESTNG_SUITE.trim() : 'testng.xml'
-  def playwrightHeadless = (env.PLAYWRIGHT_HEADLESS?.trim()) ? env.PLAYWRIGHT_HEADLESS.trim() : 'true'
+  def branchName = coalesceStr(params.BRANCH_NAME, env.BRANCH_NAME, 'dev_jenkin')
+  def emailTo = coalesceStr(params.EMAIL_TO, env.EMAIL_TO, 'ducanhdhtb@gmail.com')
+  def requestedProfile = coalesceStr(params.RUN_PROFILE, env.RUN_PROFILE, 'AUTO')
+
+  def profile = (requestedProfile?.toUpperCase() == 'AUTO') ? scheduledProfile() : requestedProfile.toUpperCase()
+  def suiteOverride = coalesceStr(params.TESTNG_SUITE, env.TESTNG_SUITE, '')
+  def testngSuite = suiteOverride ? suiteOverride : suiteForProfile(profile)
+
+  def testGroups = coalesceStr(params.TEST_GROUPS, env.TEST_GROUPS, '')
+  def excludedGroups = coalesceStr(params.EXCLUDED_GROUPS, env.EXCLUDED_GROUPS, '')
+  def playwrightHeadless = coalesceStr(params.PLAYWRIGHT_HEADLESS, env.PLAYWRIGHT_HEADLESS, 'true')
+
+  boolean needsBrowser = !(testngSuite?.toLowerCase()?.contains('api'))
   int installExitCode = 0
   int testExitCode = 0
   boolean failed = false
@@ -46,6 +111,10 @@ node {
     stage('Init') {
       echo "[Init] Repo: ${repoUrl}"
       echo "[Init] Branch: ${branchName}"
+      echo "[Init] RUN_PROFILE(requested)=${requestedProfile} => profile=${profile}"
+      echo "[Init] Suite: ${testngSuite}"
+      echo "[Init] Groups override: '${testGroups}', Excluded override: '${excludedGroups}'"
+      echo "[Init] Headless: ${playwrightHeadless}"
     }
 
     stage('Checkout') {
@@ -59,6 +128,11 @@ node {
     }
 
     stage('Install Browsers') {
+      if (!needsBrowser) {
+        echo "[Install Browsers] Skipped (API-only run)"
+        return
+      }
+
       echo "[Install Browsers] Start"
       installExitCode = sh(
         script: '''
@@ -155,6 +229,7 @@ node {
         "Job: ${env.JOB_NAME}\n" +
         "Build: #${env.BUILD_NUMBER}\n" +
         "Branch: ${branchName}\n" +
+        "Profile: ${profile}\n" +
         "URL: ${env.BUILD_URL}\n" +
         "TestNGSuite: ${testngSuite}\n" +
         "Groups: ${testGroups}\n" +
