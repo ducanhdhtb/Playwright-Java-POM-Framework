@@ -1,5 +1,7 @@
 package automation_exercise;
 
+import api.ApiClient;
+import api.UserApiHelper;
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.AriaRole;
@@ -42,6 +44,10 @@ public class BaseTest {
     protected Browser browser;
     protected BrowserContext context;
     protected Page page;
+
+    // API layer — available to all tests for setup/teardown without UI
+    protected ApiClient apiClient;
+    protected UserApiHelper userApi;
 
     protected HomePage homePage;
     protected SignupLoginPage signupLoginPage;
@@ -230,6 +236,10 @@ public class BaseTest {
             default -> playwright.chromium();
         };
         browser = browserType.launch(launchOptions);
+
+        // API client is created once per class alongside the browser
+        apiClient = new ApiClient(playwright);
+        userApi = new UserApiHelper(apiClient);
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -368,6 +378,9 @@ public class BaseTest {
     public void tearDown() {
         if (browser != null) {
             browser.close();
+        }
+        if (apiClient != null) {
+            apiClient.dispose();
         }
         if (playwright != null) {
             playwright.close();

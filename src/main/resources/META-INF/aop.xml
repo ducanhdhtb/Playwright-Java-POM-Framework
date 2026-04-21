@@ -4,6 +4,7 @@
     <weaver>
         <!-- Enable weaving for test code + Page Objects so Allure @Step works. -->
         <include within="utils..*"/>
+        <include within="api..*"/>
         <include within="pages..*"/>
         <include within="automation_exercise..*"/>
         <!-- Avoid weaving TestNG test classes; it can trigger duplicate AjcClosure definitions in surefire. -->
