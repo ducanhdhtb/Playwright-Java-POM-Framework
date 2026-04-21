@@ -13,7 +13,8 @@ public class TC10_VerifySubscription extends BaseTest {
     @Test(
             priority = 10,
             dataProvider = "tc10DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"smoke"}
     )
     @Step("TC10: Verify subscription on home page")
     public void verifySubscription(String email) {

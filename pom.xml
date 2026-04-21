@@ -17,6 +17,11 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- TestNG / Surefire -->
+    <testng.suiteXmlFile>testng.xml</testng.suiteXmlFile>
+    <testng.groups></testng.groups>
+    <testng.excludedGroups></testng.excludedGroups>
   </properties>
 
   <!-- ================= BUILD ================= -->
@@ -45,8 +50,10 @@
 	            -Dorg.aspectj.weaver.loadtime.configuration=META-INF/aop.xml
 	            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
 	          </argLine>
+            <groups>${testng.groups}</groups>
+            <excludedGroups>${testng.excludedGroups}</excludedGroups>
 	          <suiteXmlFiles>
-	            <suiteXmlFile>testng.xml</suiteXmlFile>
+	            <suiteXmlFile>${testng.suiteXmlFile}</suiteXmlFile>
 	          </suiteXmlFiles>
 	        </configuration>
 	      </plugin>

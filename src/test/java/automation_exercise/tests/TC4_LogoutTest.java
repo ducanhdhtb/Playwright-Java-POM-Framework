@@ -11,7 +11,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC4_LogoutTest extends BaseTest {
 
-    @Test(priority = 4)
+    @Test(priority = 4, groups = {"regression"})
     @Step("TC4: Logout user")
     public void testLogoutUser() {
         homePage.navigate(ConfigReader.getProperty("baseUrl"));

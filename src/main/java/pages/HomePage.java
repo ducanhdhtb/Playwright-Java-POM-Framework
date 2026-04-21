@@ -1,6 +1,7 @@
 package pages;
 
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 
@@ -32,6 +33,10 @@ public class HomePage extends BasePage {
     @Step("Navigating to URL: {0}")
     public void navigate(String url) {
         super.navigate(url);
+        // Stabilize: ensure the app shell is ready before tests assert title or click header links.
+        locator("#header").waitFor(new com.microsoft.playwright.Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(30_000));
     }
 
     @Step("Clicking on 'Signup / Login' button")

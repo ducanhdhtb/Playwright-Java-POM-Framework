@@ -13,7 +13,8 @@ public class E2EPurchaseTest extends BaseTest {
     @Test(
             description = "Full E2E test: Search, Add to Cart, Register, Checkout, and Delete Account",
             dataProvider = "e2ePurchaseDataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"e2e"}
     )
     @Step("E2E: search product, register, checkout, and delete account")
     public void testEndToEndProductOrderFlow(

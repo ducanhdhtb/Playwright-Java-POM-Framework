@@ -13,7 +13,8 @@ public class TC9_SearchProduct extends BaseTest {
     @Test(
             priority = 9,
             dataProvider = "tc9DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"smoke"}
     )
     @Step("TC9: Search for products")
     public void searchProduct(String searchKey) {

@@ -16,7 +16,8 @@ public class TC6_ContactUsForm extends BaseTest {
 	    @Test(
                 priority = 6,
                 dataProvider = "tc6DataProvider",
-                dataProviderClass = TestData.class
+                dataProviderClass = TestData.class,
+                groups = {"regression"}
         )
 	    @Step("TC6: Submit the contact us form")
 	    public void testContactUsForm(
@@ -50,9 +51,7 @@ public class TC6_ContactUsForm extends BaseTest {
         contactPage.clickSubmit();
 
 	        // 10. Verify success message is visible
-            contactPage.waitForSuccessMessageVisible();
-	        assertThat(page.locator("#contact-page .status.alert.alert-success"))
-	                .containsText(expectedSuccessText);
+	        contactPage.waitForSuccessMessage(expectedSuccessText);
 
 	        // 11. Click 'Home' button and verify landing
 	        contactPage.clickHome();

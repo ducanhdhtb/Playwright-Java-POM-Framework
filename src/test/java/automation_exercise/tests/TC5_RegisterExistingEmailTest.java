@@ -15,7 +15,8 @@ public class TC5_RegisterExistingEmailTest extends BaseTest {
     @Test(
             priority = 5,
             dataProvider = "tc5DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"regression"}
     )
     @Step("TC5: Register with an existing email")
     public void testRegisterWithExistingEmail(String name, String password, String expectedError) {

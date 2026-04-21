@@ -14,7 +14,8 @@ public class TC16_PlaceOrderLoginBeforeCheckout extends BaseTest {
             description = "Test Case 16: Place Order: Login before Checkout",
             priority = 16,
             dataProvider = "tc16DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"e2e", "regression"}
     )
     @Step("TC16: Login before checkout and place order")
     public void placeOrderLoginBeforeCheckout(

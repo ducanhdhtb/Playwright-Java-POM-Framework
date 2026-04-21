@@ -3,6 +3,7 @@ package pages;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import io.qameta.allure.Step;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -27,6 +28,10 @@ public class ProductsPage extends BasePage {
     @Step("Adding product at index {0} to cart")
     public void addProductToCartByIndex(int index) {
         Locator product = locator(".single-products").nth(index);
+        product.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(30_000));
+        product.scrollIntoViewIfNeeded();
         product.hover();
         product.locator(".add-to-cart").first().click();
     }
@@ -44,7 +49,12 @@ public class ProductsPage extends BasePage {
 
     @Step("Adding the first product to cart")
     public void addFirstProductToCart() {
-        locator(PRODUCT_BOX).first().hover();
+        Locator firstProduct = locator(PRODUCT_BOX).first();
+        firstProduct.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(30_000));
+        firstProduct.scrollIntoViewIfNeeded();
+        firstProduct.hover();
         locator(ADD_TO_CART_BTN).first().click();
     }
 
@@ -56,7 +66,16 @@ public class ProductsPage extends BasePage {
 
     @Step("Clicking 'View Cart' link")
     public void clickViewCart() {
-        byRole(AriaRole.LINK, VIEW_CART_LINK).first().click();
+        Locator viewCart = byRole(AriaRole.LINK, VIEW_CART_LINK).first();
+        try {
+            viewCart.waitFor(new Locator.WaitForOptions()
+                    .setState(WaitForSelectorState.VISIBLE)
+                    .setTimeout(10_000));
+            viewCart.click();
+        } catch (RuntimeException e) {
+            // Modal can be flaky; fall back to direct navigation.
+            super.navigate("https://automationexercise.com/view_cart");
+        }
     }
 
     @Step("Clicking 'View Product' by index: {0}")

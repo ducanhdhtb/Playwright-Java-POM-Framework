@@ -206,7 +206,7 @@ public class BaseTest {
         return env;
     }
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setupBrowser() {
         String browserPath = configuredBrowserPath();
         playwright = Playwright.create(new Playwright.CreateOptions()
@@ -232,8 +232,14 @@ public class BaseTest {
         browser = browserType.launch(launchOptions);
     }
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void initContext() {
+        // When running with TestNG groups filtering, configuration methods can be skipped unless alwaysRun=true.
+        // This guard keeps tests from NPE-ing in case setupBrowser wasn't invoked for any reason.
+        if (browser == null) {
+            setupBrowser();
+        }
+
         Browser.NewContextOptions contextOptions = new Browser.NewContextOptions()
                 .setIgnoreHTTPSErrors(ignoreHttpsErrors());
 
@@ -311,7 +317,7 @@ public class BaseTest {
         return email;
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void stopTracingAndClose(ITestResult result) {
         if (context == null) {
             return;
@@ -358,7 +364,7 @@ public class BaseTest {
         }
     }
 
-    @AfterClass
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         if (browser != null) {
             browser.close();

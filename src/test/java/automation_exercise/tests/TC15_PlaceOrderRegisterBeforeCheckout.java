@@ -14,7 +14,8 @@ public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
             description = "Test Case 15: Place Order: Register before Checkout",
             priority = 15,
             dataProvider = "tc15DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"e2e", "regression"}
     )
     @Step("TC15: Register before checkout and place order")
     public void placeOrderRegisterBeforeCheckout(

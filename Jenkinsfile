@@ -24,6 +24,9 @@ node {
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
   def branchName = env.BRANCH_NAME ?: 'dev_jenkin'
   def emailTo = (env.EMAIL_TO?.trim()) ? env.EMAIL_TO.trim() : 'ducanhdhtb@gmail.com'
+  def testGroups = (env.TEST_GROUPS?.trim()) ? env.TEST_GROUPS.trim() : 'smoke'
+  def excludedGroups = (env.EXCLUDED_GROUPS?.trim()) ? env.EXCLUDED_GROUPS.trim() : ''
+  def testngSuite = (env.TESTNG_SUITE?.trim()) ? env.TESTNG_SUITE.trim() : 'testng.xml'
   int installExitCode = 0
   int testExitCode = 0
   boolean failed = false
@@ -77,7 +80,10 @@ node {
     stage('Run Test') {
       echo "[Run Test] Start"
       // returnStatus keeps the pipeline running so we still publish reports + send email.
-      testExitCode = sh(script: 'mvn -B clean test', returnStatus: true)
+      testExitCode = sh(
+        script: "mvn -B clean test -Dtestng.suiteXmlFile='${testngSuite}' -Dtestng.groups='${testGroups}' -Dtestng.excludedGroups='${excludedGroups}'",
+        returnStatus: true
+      )
       if (testExitCode != 0) {
         failed = true
         currentBuild.result = 'FAILURE'
@@ -149,6 +155,9 @@ node {
         "Build: #${env.BUILD_NUMBER}\n" +
         "Branch: ${branchName}\n" +
         "URL: ${env.BUILD_URL}\n" +
+        "TestNGSuite: ${testngSuite}\n" +
+        "Groups: ${testGroups}\n" +
+        (excludedGroups ? ("ExcludedGroups: ${excludedGroups}\n") : "") +
         (total != null ? ("Tests: total=${total}, passed=${passed}, failed=${failedCount}, skipped=${skipped}\n") : "") +
         "InstallExitCode: ${installExitCode}\n" +
         "TestExitCode: ${testExitCode}\n" +

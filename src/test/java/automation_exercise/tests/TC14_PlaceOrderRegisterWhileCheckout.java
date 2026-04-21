@@ -14,7 +14,8 @@ public class TC14_PlaceOrderRegisterWhileCheckout extends BaseTest {
             description = "Test Case 14: Place Order: Register while Checkout",
             priority = 14,
             dataProvider = "tc14DataProvider",
-            dataProviderClass = TestData.class
+            dataProviderClass = TestData.class,
+            groups = {"e2e", "regression"}
     )
     @Step("TC14: Register while checkout and place order")
     public void placeOrderWithRegistration(
