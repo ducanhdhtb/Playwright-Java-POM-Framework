@@ -25,7 +25,11 @@ public class StepLoggerAspect {
             return Boolean.parseBoolean(fromProp);
         }
         String fromEnv = System.getenv("ALLURE_STEP_SCREENSHOTS");
-        return fromEnv != null && Boolean.parseBoolean(fromEnv);
+        if (fromEnv != null) {
+            return Boolean.parseBoolean(fromEnv);
+        }
+
+        return ConfigReader.getBooleanProperty("allure.step.screenshots", false);
     }
 
     private static boolean fullPageScreenshotsEnabled() {
@@ -34,7 +38,11 @@ public class StepLoggerAspect {
             return Boolean.parseBoolean(fromProp);
         }
         String fromEnv = System.getenv("ALLURE_STEP_SCREENSHOTS_FULLPAGE");
-        return fromEnv != null && Boolean.parseBoolean(fromEnv);
+        if (fromEnv != null) {
+            return Boolean.parseBoolean(fromEnv);
+        }
+
+        return ConfigReader.getBooleanProperty("allure.step.screenshots.fullPage", false);
     }
 
     private static Page resolvePage(Object target) {
