@@ -93,6 +93,9 @@ mvn test -Dtestng.suiteXmlFile=testng-parallel.xml
 # Chạy API-only (không browser)
 mvn test -Dtestng.suiteXmlFile=testng-api.xml
 
+# Chạy đúng các test mày tự chọn (edit file rồi chạy)
+mvn test -Dtestng.suiteXmlFile=testng-selected.xml
+
 # Sinh báo cáo Allure và mở trên trình duyệt
 mvn allure:serve
 

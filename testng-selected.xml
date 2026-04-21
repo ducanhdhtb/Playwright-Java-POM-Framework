@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  Manual selection suite: edit this file to list exactly which tests to run.
+
+  Run:
+    mvn test -Dtestng.suiteXmlFile=testng-selected.xml
+
+  Notes:
+  - UI tests live under:  automation_exercise.tests.ui
+  - API tests live under: automation_exercise.tests.api
+-->
+<suite name="Selected Tests" verbose="1" parallel="none" thread-count="1">
+  <listeners>
+    <listener class-name="utils.TestListener"/>
+    <listener class-name="utils.RetryTransformer"/>
+  </listeners>
+
+  <test name="Selected">
+    <classes>
+      <!-- UI examples -->
+      <!-- <class name="automation_exercise.tests.ui.TC1_RegisterUser"/> -->
+      <!-- <class name="automation_exercise.tests.ui.TC20_LoginWithApiCreatedUser"/> -->
+
+      <!-- Run only specific methods -->
+      <!--
+      <class name="automation_exercise.tests.ui.TC21_NegativeLoginTests">
+        <methods>
+          <include name="testLoginWithWrongPassword"/>
+          <include name="testLoginWithNonExistentEmail"/>
+        </methods>
+      </class>
+      -->
+
+      <!-- API examples -->
+      <!-- <class name="automation_exercise.tests.api.TC_API01_CreateUserAccount"/> -->
+      <!-- <class name="automation_exercise.tests.api.TC_API02_VerifyLogin"/> -->
+    </classes>
+  </test>
+</suite>
+
