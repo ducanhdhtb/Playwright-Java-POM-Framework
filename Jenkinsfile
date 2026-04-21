@@ -28,13 +28,14 @@ node {
   int testExitCode = 0
   boolean failed = false
   String failDetails = ""
+  def junitSummary = null
 
   // Maven tool (fallback to system mvn)
   try {
     def mvnHome = tool name: 'maven3', type: 'maven'
     env.PATH = "${mvnHome}/bin:${env.PATH}"
   } catch(Exception e) {
-    echo "⚠️ Maven tool 'maven3' not configured, using system mvn"
+    echo "Warning: Maven tool 'maven3' not configured, using system mvn"
   }
 
   try {
@@ -109,7 +110,7 @@ EOF
     stage('Report') {
       echo "[Report] JUnit..."
       try {
-        junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+        junitSummary = junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
       } catch (Exception e) {
         echo "[Report] JUnit publish failed: ${e.getClass().getName()}: ${e.message}"
       }
@@ -128,19 +129,38 @@ EOF
       } catch (Exception e) {
         echo "[Report] Archive failed: ${e.getClass().getName()}: ${e.message}"
       }
+
+      echo "[Report] Archive surefire reports..."
+      try {
+        archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true, allowEmptyArchive: true
+      } catch (Exception e) {
+        echo "[Report] Archive surefire reports failed: ${e.getClass().getName()}: ${e.message}"
+      }
     }
 
     stage('Notify') {
       def result = currentBuild.currentResult ?: (currentBuild.result ?: 'SUCCESS')
       def subject = "${result} ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+
+      def total = junitSummary?.totalCount
+      def failedCount = junitSummary?.failCount
+      def skipped = junitSummary?.skipCount
+      def passed = (total != null && failedCount != null && skipped != null) ? (total - failedCount - skipped) : null
+
+      def allureUrl = env.BUILD_URL ? "${env.BUILD_URL}allure/" : ""
+      def artifactsUrl = env.BUILD_URL ? "${env.BUILD_URL}artifact/" : ""
+
       def body =
         "Result: ${result}\n" +
         "Job: ${env.JOB_NAME}\n" +
         "Build: #${env.BUILD_NUMBER}\n" +
         "Branch: ${branchName}\n" +
         "URL: ${env.BUILD_URL}\n" +
+        (total != null ? ("Tests: total=${total}, passed=${passed}, failed=${failedCount}, skipped=${skipped}\n") : "") +
         "InstallExitCode: ${installExitCode}\n" +
         "TestExitCode: ${testExitCode}\n" +
+        (allureUrl ? ("Allure: ${allureUrl}\n") : "") +
+        (artifactsUrl ? ("Artifacts: ${artifactsUrl}\n") : "") +
         (failDetails ? ("\nDetails:\n" + failDetails) : "")
 
       sendBuildEmail(emailTo, subject, body)
