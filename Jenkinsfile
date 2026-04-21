@@ -1,9 +1,13 @@
-def sendBuildEmail(String to, String subject, String body) {
+def sendBuildEmail(String to, String subject, String bodyText, String bodyHtml = null) {
   echo "[Notify] Email to=${to}, subject=${subject}"
 
   // Prefer Email Extension plugin if available; fall back to core Mailer step.
   try {
-    emailext to: to, subject: subject, body: body, mimeType: 'text/plain'
+    if (bodyHtml != null && bodyHtml.trim()) {
+      emailext to: to, subject: subject, body: bodyHtml, mimeType: 'text/html'
+    } else {
+      emailext to: to, subject: subject, body: bodyText, mimeType: 'text/plain'
+    }
     echo "[Notify] Sent via emailext"
     return
   } catch (Exception e1) {
@@ -11,7 +15,8 @@ def sendBuildEmail(String to, String subject, String body) {
   }
 
   try {
-    mail to: to, subject: subject, body: body
+    // core Mailer plugin doesn't consistently support HTML; send plain text.
+    mail to: to, subject: subject, body: bodyText
     echo "[Notify] Sent via mail"
   } catch (Exception e2) {
     echo "[Notify] mail not available/failed: ${e2.getClass().getName()}: ${e2.message}"
@@ -55,6 +60,41 @@ def suiteForProfile(String profile) {
     case 'SMOKE': return 'testng-smoke.xml'
     default: return 'testng-smoke.xml'
   }
+}
+
+def parseAttrsFromTag(String tag) {
+  def m = [:]
+  if (!tag) return m
+  // Extract key="value" pairs; good enough for TestNG XML.
+  def re = (tag =~ /([A-Za-z0-9_:-]+)="([^"]*)"/)
+  re.each { g ->
+    m[g[1]] = g[2]
+  }
+  return m
+}
+
+def parseFailedTestsFromTestngResults(String xmlText) {
+  def out = []
+  if (!xmlText) return out
+
+  // Avoid XmlSlurper to reduce Jenkins sandbox/script-approval friction.
+  // Parse class blocks and then test-method tags inside them.
+  def classBlocks = (xmlText =~ /(?s)<class\b[^>]*\bname="([^"]+)"[^>]*>(.*?)<\/class>/)
+  classBlocks.each { g ->
+    def className = g[1]
+    def body = g[2]
+    def methods = (body =~ /<test-method\b[^>]*>/)
+    methods.each { mm ->
+      def attrs = parseAttrsFromTag(mm[0])
+      if (attrs['status'] == 'FAIL' && attrs['is-config'] != 'true') {
+        def methodName = attrs['name']
+        if (className && methodName) {
+          out << [className: className, methodName: methodName]
+        }
+      }
+    }
+  }
+  return out
 }
 
 // Hourly cron trigger. For per-profile cron with parameters, you'd need the "Parameterized Scheduler" plugin.
@@ -229,6 +269,13 @@ node {
       } catch (Exception e) {
         echo "[Report] Archive traces/videos failed: ${e.getClass().getName()}: ${e.message}"
       }
+
+      echo "[Report] Archive failure snapshots..."
+      try {
+        archiveArtifacts artifacts: 'target/artifacts/**', fingerprint: true, allowEmptyArchive: true
+      } catch (Exception e) {
+        echo "[Report] Archive artifacts failed: ${e.getClass().getName()}: ${e.message}"
+      }
     }
 
     stage('Notify') {
@@ -242,8 +289,21 @@ node {
 
       def allureUrl = env.BUILD_URL ? "${env.BUILD_URL}allure/" : ""
       def artifactsUrl = env.BUILD_URL ? "${env.BUILD_URL}artifact/" : ""
+      def surefireHtml = artifactsUrl ? (artifactsUrl + "target/surefire-reports/index.html") : ""
+
+      // Parse failed tests for nicer email (best-effort).
+      def failedTests = []
+      try {
+        def xmlPath = 'target/surefire-reports/testng-results.xml'
+        if (fileExists(xmlPath)) {
+          failedTests = parseFailedTestsFromTestngResults(readFile(xmlPath))
+        }
+      } catch (Exception e) {
+        echo "[Notify] Failed test parse failed: ${e.getClass().getName()}: ${e.message}"
+      }
 
       // List trace artifacts so recipients can download and open them in Playwright Trace Viewer.
+      def traceFiles = []
       def traceLinks = ""
       try {
         def traces = sh(
@@ -252,6 +312,7 @@ node {
         ).trim()
         if (traces) {
           def lines = traces.split("\\r?\\n") as List
+          traceFiles = lines
           def sb = new StringBuilder()
           sb.append("\\nTraces (download .zip):\\n")
           for (String f : lines) {
@@ -268,7 +329,7 @@ node {
         echo "[Notify] Trace list failed: ${e.getClass().getName()}: ${e.message}"
       }
 
-      def body =
+      def bodyText =
         "Result: ${result}\n" +
         "Job: ${env.JOB_NAME}\n" +
         "Build: #${env.BUILD_NUMBER}\n" +
@@ -283,10 +344,91 @@ node {
         "TestExitCode: ${testExitCode}\n" +
         (allureUrl ? ("Allure: ${allureUrl}\n") : "") +
         (artifactsUrl ? ("Artifacts: ${artifactsUrl}\n") : "") +
+        (surefireHtml ? ("SurefireReport: ${surefireHtml}\n") : "") +
         (failDetails ? ("\nDetails:\n" + failDetails) : "") +
         (traceLinks ?: "")
 
-      sendBuildEmail(emailTo, subject, body)
+      def bodyHtml = null
+      try {
+        def sb = new StringBuilder()
+        sb.append("<div style='font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;'>")
+        sb.append("<h2 style='margin:0 0 8px 0;'>").append(subject).append("</h2>")
+        sb.append("<table cellpadding='6' cellspacing='0' style='border-collapse:collapse;border:1px solid #ddd;'>")
+        def row = { k, v ->
+          sb.append("<tr>")
+          sb.append("<td style='border:1px solid #ddd;background:#f7f7f7;'><b>").append(k).append("</b></td>")
+          sb.append("<td style='border:1px solid #ddd;'>").append(v ?: "").append("</td>")
+          sb.append("</tr>")
+        }
+        row("Result", result)
+        row("Job", env.JOB_NAME)
+        row("Build", "#${env.BUILD_NUMBER}")
+        row("Branch", branchName)
+        row("Profile", profile)
+        row("Suite", testngSuite)
+        row("GroupsOverride", testGroups ?: "<from suite xml>")
+        if (excludedGroups) row("ExcludedGroups", excludedGroups)
+        if (total != null) row("Tests", "total=${total}, passed=${passed}, failed=${failedCount}, skipped=${skipped}")
+        row("InstallExitCode", String.valueOf(installExitCode))
+        row("TestExitCode", String.valueOf(testExitCode))
+        if (env.BUILD_URL) row("Build URL", "<a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>")
+        if (allureUrl) row("Allure", "<a href='${allureUrl}'>open</a>")
+        if (surefireHtml) row("Surefire", "<a href='${surefireHtml}'>open</a>")
+        if (artifactsUrl) row("Artifacts", "<a href='${artifactsUrl}'>browse</a>")
+        sb.append("</table>")
+
+        if (failedTests && artifactsUrl) {
+          sb.append("<h3 style='margin:16px 0 8px 0;'>Failed Tests</h3>")
+          sb.append("<ul>")
+          for (t in failedTests) {
+            def base = (t.className + "_" + t.methodName).replaceAll("[^A-Za-z0-9_.-]", "_")
+            def png = ""
+            def html = ""
+            def meta = ""
+            try {
+              png = sh(script: "ls -1 target/artifacts/failures/${base}_*.png 2>/dev/null | sort | tail -n 1", returnStdout: true).trim()
+              html = sh(script: "ls -1 target/artifacts/failures/${base}_*.html 2>/dev/null | sort | tail -n 1", returnStdout: true).trim()
+              meta = sh(script: "ls -1 target/artifacts/failures/${base}_*.txt 2>/dev/null | sort | tail -n 1", returnStdout: true).trim()
+            } catch (Exception ignored) {
+            }
+            sb.append("<li><code>").append(t.className).append("#").append(t.methodName).append("</code>")
+            if (png) sb.append(" - <a href='").append(artifactsUrl).append(png).append("'>screenshot</a>")
+            if (html) sb.append(" - <a href='").append(artifactsUrl).append(html).append("'>dom.html</a>")
+            if (meta) sb.append(" - <a href='").append(artifactsUrl).append(meta).append("'>meta</a>")
+            if (png) {
+              // Many email clients block remote images by default; link above is the reliable fallback.
+              sb.append("<br/><img alt='screenshot' style='max-width:720px;border:1px solid #ddd;margin-top:6px;' src='")
+                .append(artifactsUrl).append(png).append("'/>")
+            }
+            sb.append("</li>")
+          }
+          sb.append("</ul>")
+        }
+
+        if (failDetails) {
+          sb.append("<h3 style='margin:16px 0 8px 0;'>Details</h3>")
+          sb.append("<pre style='white-space:pre-wrap;background:#111;color:#eee;padding:10px;border-radius:6px;'>")
+          sb.append(failDetails.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+          sb.append("</pre>")
+        }
+
+        if (traceFiles && artifactsUrl) {
+          sb.append("<h3 style='margin:16px 0 8px 0;'>Traces</h3>")
+          sb.append("<p>Download the trace .zip and open with <code>npx playwright show-trace file.zip</code>.</p>")
+          sb.append("<ul>")
+          for (String f : traceFiles) {
+            sb.append("<li><a href='").append(artifactsUrl).append(f).append("'>").append(f).append("</a></li>")
+          }
+          sb.append("</ul>")
+        }
+
+        sb.append("</div>")
+        bodyHtml = sb.toString()
+      } catch (Exception e) {
+        echo "[Notify] HTML body build failed: ${e.getClass().getName()}: ${e.message}"
+      }
+
+      sendBuildEmail(emailTo, subject, bodyText, bodyHtml)
     }
 
     if (failed) {

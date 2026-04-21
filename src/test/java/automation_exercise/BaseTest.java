@@ -25,6 +25,7 @@ import utils.ConfigReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -337,6 +338,9 @@ public class BaseTest {
                 ? result.getName()
                 : "test";
         boolean passed = result != null && result.isSuccess();
+        String className = (result != null && result.getTestClass() != null && result.getTestClass().getName() != null)
+                ? result.getTestClass().getName()
+                : "TestClass";
 
         Video video = null;
         try {
@@ -344,6 +348,43 @@ public class BaseTest {
                 video = page.video();
             }
         } catch (Exception ignored) {
+        }
+
+        // Persist a failure snapshot for Jenkins/email debugging.
+        // Allure already gets attachments via listener/aspect, but Jenkins needs files to link as artifacts.
+        if (!passed && page != null) {
+            try {
+                Path dir = Paths.get("target", "artifacts", "failures");
+                Files.createDirectories(dir);
+
+                String base = (className + "_" + testName).replaceAll("[^A-Za-z0-9_.-]", "_");
+                long ts = System.currentTimeMillis();
+                Path screenshotPath = dir.resolve(base + "_" + ts + ".png");
+                Path htmlPath = dir.resolve(base + "_" + ts + ".html");
+                Path metaPath = dir.resolve(base + "_" + ts + ".txt");
+
+                if (!page.isClosed()) {
+                    page.screenshot(new Page.ScreenshotOptions()
+                            .setFullPage(true)
+                            .setPath(screenshotPath));
+                }
+
+                try {
+                    String html = page.content();
+                    Files.writeString(htmlPath, html, StandardCharsets.UTF_8);
+                } catch (Exception ignored) {
+                }
+
+                try {
+                    String meta = "class=" + className + "\n"
+                            + "test=" + testName + "\n"
+                            + "url=" + (page.isClosed() ? "" : page.url()) + "\n"
+                            + "title=" + (page.isClosed() ? "" : page.title()) + "\n";
+                    Files.writeString(metaPath, meta, StandardCharsets.UTF_8);
+                } catch (Exception ignored) {
+                }
+            } catch (Exception ignored) {
+            }
         }
 
         TracingMode tracingMode = tracingMode();
