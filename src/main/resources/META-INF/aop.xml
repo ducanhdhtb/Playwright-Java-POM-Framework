@@ -6,6 +6,8 @@
         <include within="utils..*"/>
         <include within="pages..*"/>
         <include within="automation_exercise..*"/>
+        <!-- Avoid weaving TestNG test classes; it can trigger duplicate AjcClosure definitions in surefire. -->
+        <exclude within="automation_exercise.tests..*"/>
     </weaver>
     <aspects>
         <!-- Specify the exact aspect class to be used -->
