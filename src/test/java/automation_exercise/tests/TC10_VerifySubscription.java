@@ -1,15 +1,19 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC10_VerifySubscription extends BaseTest {
 
     @Test(priority = 10)
+    @Step("TC10: Verify subscription on home page")
     public void verifySubscription() {
         // 1 & 2. Launch browser and Navigate to URL
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
         assertThat(page).hasTitle("Automation Exercise");

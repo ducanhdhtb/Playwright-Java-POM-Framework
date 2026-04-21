@@ -14,3 +14,6 @@ Thumbs.db
 # Logs & Videos (Nếu mày muốn giữ local không đẩy lên)
 logs/
 *.log
+
+# Playwright traces (zip)
+traces/

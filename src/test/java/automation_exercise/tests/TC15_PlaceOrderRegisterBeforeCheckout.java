@@ -1,15 +1,19 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
 
     @Test(description = "Test Case 15: Place Order: Register before Checkout",priority = 15)
+    @Step("TC15: Register before checkout and place order")
     public void placeOrderRegisterBeforeCheckout() {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
         assertThat(page).hasTitle("Automation Exercise");
 
         // 4. Click 'Signup / Login' button

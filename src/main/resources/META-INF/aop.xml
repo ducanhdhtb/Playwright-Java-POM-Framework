@@ -1,0 +1,12 @@
+<!DOCTYPE aspectj PUBLIC
+        "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+    <weaver>
+        <!-- Weave all classes in the 'utils' package and its subpackages -->
+        <include within="utils..*"/>
+    </weaver>
+    <aspects>
+        <!-- Specify the exact aspect class to be used -->
+        <aspect name="utils.StepLoggerAspect"/>
+    </aspects>
+</aspectj>

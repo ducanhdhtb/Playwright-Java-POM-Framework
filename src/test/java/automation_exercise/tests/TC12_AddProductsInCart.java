@@ -1,15 +1,19 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC12_AddProductsInCart extends BaseTest {
 
     @Test(description = "Test Case 12: Add Products in Cart",priority = 12)
+    @Step("TC12: Add products to cart")
     public void addProductsToCart() {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
         assertThat(page).hasTitle("Automation Exercise");
 
         // 4. Click 'Products' button

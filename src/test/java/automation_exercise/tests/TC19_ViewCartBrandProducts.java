@@ -1,15 +1,18 @@
 package automation_exercise.tests;
 
 import automation_exercise.BaseTest;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
 
 public class TC19_ViewCartBrandProducts extends BaseTest {
 
     @Test(description = "Test Case 19: View & Cart Brand Products",priority = 19)
+    @Step("TC19: View brand products")
     public void viewCartBrandProducts() {
 
         // 1-2 Navigate to Home
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3 Click Products
         homePage.clickProducts();

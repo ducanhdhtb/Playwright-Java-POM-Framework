@@ -3,15 +3,19 @@ package automation_exercise.tests;
 import automation_exercise.BaseTest;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
 import org.testng.annotations.Test;
+import utils.ConfigReader;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC7_VerifyTestCasesPage extends BaseTest {
 
     @Test(priority = 7)
+    @Step("TC7: Open the test cases page")
     public void testVerifyTestCasesPageNavigation() {
         // 1 & 2. Khởi tạo trình duyệt và điều hướng (Xử lý bởi BaseTest)
-        homePage.navigate();
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
         assertThat(page).hasTitle("Automation Exercise");
