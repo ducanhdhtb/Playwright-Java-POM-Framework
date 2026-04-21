@@ -10,7 +10,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC8_VerifyProductDetailTest extends BaseTest {
 
-    @Test(priority = 8)
+    @Test(priority = 8, groups = {"regression"})
     @Step("TC8: Verify product detail page")
     public void testVerifyAllProductsAndDetail() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)

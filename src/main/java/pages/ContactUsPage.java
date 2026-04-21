@@ -1,11 +1,17 @@
 package pages;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import java.nio.file.Path;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
 public class ContactUsPage extends BasePage {
+
+    private static final String SUCCESS_MESSAGE = "#contact-page .status.alert.alert-success";
 
     public ContactUsPage(Page page) {
         super(page);
@@ -27,6 +33,16 @@ public class ContactUsPage extends BasePage {
     @Step("Clicking 'Submit' button and accepting alert")
     public void clickSubmit() {
         page.locator("input[data-qa='submit-button']").click();
+    }
+
+    @Step("Waiting for contact form success message to contain: {0}")
+    public void waitForSuccessMessage(String expectedText) {
+        Locator msg = page.locator(SUCCESS_MESSAGE);
+        msg.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.ATTACHED)
+                .setTimeout(30_000));
+        // Visibility can be flaky on this page (element exists but toggles styles); text is what we care about.
+        assertThat(msg).containsText(expectedText);
     }
 
     @Step("Clicking 'Home' button from contact page")

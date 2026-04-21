@@ -14,8 +14,9 @@ public class TC3_LoginUserWithIncorrectCredentials extends BaseTest {
 
     @Test(
             priority = 3,
-            dataProvider = "invalidLoginDataProvider",
-            dataProviderClass = TestData.class
+            dataProvider = "tc3DataProvider",
+            dataProviderClass = TestData.class,
+            groups = {"smoke"}
     )
     @Step("TC3: Login with invalid credentials")
     public void testLoginWithIncorrectCredentials(String email, String password, String expectedError) {

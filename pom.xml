@@ -17,6 +17,11 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- TestNG / Surefire -->
+    <testng.suiteXmlFile>testng.xml</testng.suiteXmlFile>
+    <testng.groups></testng.groups>
+    <testng.excludedGroups></testng.excludedGroups>
   </properties>
 
   <!-- ================= BUILD ================= -->
@@ -33,46 +38,25 @@
         </configuration>
       </plugin>
 
-      <!-- AspectJ Weaver Plugin (Updated) -->
-      <plugin>
-        <groupId>dev.aspectj</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.13.1</version>
-        <configuration>
-          <complianceLevel>${maven.compiler.source}</complianceLevel>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-          <aspectLibraries>
-            <aspectLibrary>
-              <groupId>org.aspectj</groupId>
-              <artifactId>aspectjrt</artifactId>
-            </aspectLibrary>
-          </aspectLibraries>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>test-compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
-        <configuration>
-          <argLine>
-            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-          </argLine>
-          <suiteXmlFiles>
-            <suiteXmlFile>testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
+	        <version>3.1.2</version>
+	        <configuration>
+	          <argLine>
+	            --add-opens java.base/java.lang=ALL-UNNAMED
+	            --add-opens java.base/java.lang.invoke=ALL-UNNAMED
+	            -Dorg.aspectj.weaver.loadtime.configuration=META-INF/aop.xml
+	            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+	          </argLine>
+            <groups>${testng.groups}</groups>
+            <excludedGroups>${testng.excludedGroups}</excludedGroups>
+	          <suiteXmlFiles>
+	            <suiteXmlFile>${testng.suiteXmlFile}</suiteXmlFile>
+	          </suiteXmlFiles>
+	        </configuration>
+	      </plugin>
 
       <!-- Copy AspectJ Weaver (This might be redundant now, but safe to keep) -->
       <plugin>
@@ -133,6 +117,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Silence SLF4J "StaticLoggerBinder" warning coming from TestNG's slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.7.36</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Log4j -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -147,15 +139,15 @@
     </dependency>
 
     <!-- Allure -->
-    <dependency>
-      <groupId>io.qameta.allure</groupId>
-      <artifactId>allure-testng</artifactId>
-      <version>2.24.0</version>
-    </dependency>
+	    <dependency>
+	      <groupId>io.qameta.allure</groupId>
+	      <artifactId>allure-testng</artifactId>
+	      <version>2.24.0</version>
+	    </dependency>
 
-    <!-- AspectJ runtime for test aspects (StepAspect) -->
-    <dependency>
-      <groupId>org.aspectj</groupId>
+	    <!-- AspectJ runtime for test aspects (StepAspect) -->
+	    <dependency>
+	      <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
       <version>${aspectj.version}</version>
       <!-- <scope>test</scope> -->

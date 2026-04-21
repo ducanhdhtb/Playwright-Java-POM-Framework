@@ -1,6 +1,7 @@
 package automation_exercise;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import org.testng.ITestResult;
@@ -27,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BaseTest {
+    private enum TracingMode { OFF, ON, RETAIN_ON_FAILURE }
+    private enum VideoMode { OFF, ON, RETAIN_ON_FAILURE }
+
     private static final List<String> DEFAULT_BROWSER_PATHS = List.of(
             "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
@@ -55,11 +59,117 @@ public class BaseTest {
     }
 
     private boolean headless() {
-        return ConfigReader.getBooleanProperty("headless", true);
+        return ConfigReader.getBooleanProperty(
+                "playwright.headless",
+                ConfigReader.getBooleanProperty("headless", true)
+        );
     }
 
     private double slowMo() {
-        return ConfigReader.getIntProperty("slowMo", 0);
+        return ConfigReader.getIntProperty(
+                "playwright.slowMoMs",
+                ConfigReader.getIntProperty("slowMo", 0)
+        );
+    }
+
+    private int defaultTimeoutMs() {
+        return ConfigReader.getIntProperty("playwright.defaultTimeoutMs", 30_000);
+    }
+
+    private int navigationTimeoutMs() {
+        return ConfigReader.getIntProperty("playwright.navigationTimeoutMs", 30_000);
+    }
+
+    private int assertionTimeoutMs() {
+        return ConfigReader.getIntProperty("playwright.assertionTimeoutMs", 5_000);
+    }
+
+    private String browserName() {
+        return ConfigReader.getProperty("playwright.browser", "chromium").trim().toLowerCase();
+    }
+
+    private String browserChannel() {
+        return ConfigReader.getProperty("playwright.channel");
+    }
+
+    private int viewportWidth() {
+        return ConfigReader.getIntProperty("playwright.viewport.width", 0);
+    }
+
+    private int viewportHeight() {
+        return ConfigReader.getIntProperty("playwright.viewport.height", 0);
+    }
+
+    private String locale() {
+        return ConfigReader.getProperty("playwright.locale");
+    }
+
+    private String timezoneId() {
+        return ConfigReader.getProperty("playwright.timezoneId");
+    }
+
+    private boolean ignoreHttpsErrors() {
+        return ConfigReader.getBooleanProperty("playwright.ignoreHttpsErrors", false);
+    }
+
+    private static TracingMode parseTracingMode(String raw) {
+        if (raw == null) {
+            return TracingMode.RETAIN_ON_FAILURE;
+        }
+        return switch (raw.trim().toLowerCase()) {
+            case "off", "false", "0" -> TracingMode.OFF;
+            case "on", "true", "1" -> TracingMode.ON;
+            case "retain-on-failure", "retain" -> TracingMode.RETAIN_ON_FAILURE;
+            default -> TracingMode.RETAIN_ON_FAILURE;
+        };
+    }
+
+    private static VideoMode parseVideoMode(String raw) {
+        if (raw == null) {
+            return VideoMode.RETAIN_ON_FAILURE;
+        }
+        return switch (raw.trim().toLowerCase()) {
+            case "off", "false", "0" -> VideoMode.OFF;
+            case "on", "true", "1" -> VideoMode.ON;
+            case "retain-on-failure", "retain" -> VideoMode.RETAIN_ON_FAILURE;
+            default -> VideoMode.RETAIN_ON_FAILURE;
+        };
+    }
+
+    private TracingMode tracingMode() {
+        return parseTracingMode(ConfigReader.getProperty("playwright.tracing", "retain-on-failure"));
+    }
+
+    private boolean tracingScreenshots() {
+        return ConfigReader.getBooleanProperty("playwright.tracing.screenshots", true);
+    }
+
+    private boolean tracingSnapshots() {
+        return ConfigReader.getBooleanProperty("playwright.tracing.snapshots", true);
+    }
+
+    private boolean tracingSources() {
+        return ConfigReader.getBooleanProperty("playwright.tracing.sources", true);
+    }
+
+    private Path tracingDir() {
+        return Paths.get(ConfigReader.getProperty("playwright.tracing.dir", "traces"));
+    }
+
+    private VideoMode videoMode() {
+        return parseVideoMode(ConfigReader.getProperty("playwright.video", "retain-on-failure"));
+    }
+
+    private Path videoDir() {
+        return Paths.get(ConfigReader.getProperty("playwright.video.dir", "target/videos"));
+    }
+
+    private int videoWidth() {
+        return ConfigReader.getIntProperty("playwright.video.width", 0);
+    }
+
+    private int videoHeight() {
+        return ConfigReader.getIntProperty("playwright.video.height", 0);
     }
 
     private String configuredBrowserPath() {
@@ -96,7 +206,7 @@ public class BaseTest {
         return env;
     }
 
-    @BeforeClass
+    @BeforeClass(alwaysRun = true)
     public void setupBrowser() {
         String browserPath = configuredBrowserPath();
         playwright = Playwright.create(new Playwright.CreateOptions()
@@ -105,22 +215,74 @@ public class BaseTest {
                 .setHeadless(headless())
                 .setSlowMo(slowMo());
 
+        String channel = browserChannel();
+        if (channel != null && !channel.isBlank()) {
+            launchOptions.setChannel(channel.trim());
+        }
+
         if (browserPath != null) {
             launchOptions.setExecutablePath(Path.of(browserPath));
         }
 
-        browser = playwright.chromium().launch(launchOptions);
+        BrowserType browserType = switch (browserName()) {
+            case "firefox" -> playwright.firefox();
+            case "webkit" -> playwright.webkit();
+            default -> playwright.chromium();
+        };
+        browser = browserType.launch(launchOptions);
     }
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void initContext() {
-        context = browser.newContext();
-        context.tracing().start(new Tracing.StartOptions()
-                .setScreenshots(true)
-                .setSnapshots(true)
-                .setSources(true));
+        // When running with TestNG groups filtering, configuration methods can be skipped unless alwaysRun=true.
+        // This guard keeps tests from NPE-ing in case setupBrowser wasn't invoked for any reason.
+        if (browser == null) {
+            setupBrowser();
+        }
+
+        Browser.NewContextOptions contextOptions = new Browser.NewContextOptions()
+                .setIgnoreHTTPSErrors(ignoreHttpsErrors());
+
+        int vw = viewportWidth();
+        int vh = viewportHeight();
+        if (vw > 0 && vh > 0) {
+            contextOptions.setViewportSize(vw, vh);
+        }
+
+        String locale = locale();
+        if (locale != null && !locale.isBlank()) {
+            contextOptions.setLocale(locale.trim());
+        }
+
+        String tz = timezoneId();
+        if (tz != null && !tz.isBlank()) {
+            contextOptions.setTimezoneId(tz.trim());
+        }
+
+        VideoMode videoMode = videoMode();
+        if (videoMode != VideoMode.OFF) {
+            contextOptions.setRecordVideoDir(videoDir());
+            int videoW = videoWidth();
+            int videoH = videoHeight();
+            if (videoW > 0 && videoH > 0) {
+                contextOptions.setRecordVideoSize(videoW, videoH);
+            }
+        }
+
+        context = browser.newContext(contextOptions);
+
+        TracingMode tracingMode = tracingMode();
+        if (tracingMode != TracingMode.OFF) {
+            context.tracing().start(new Tracing.StartOptions()
+                    .setScreenshots(tracingScreenshots())
+                    .setSnapshots(tracingSnapshots())
+                    .setSources(tracingSources()));
+        }
 
         page = context.newPage();
+        page.setDefaultTimeout(defaultTimeoutMs());
+        page.setDefaultNavigationTimeout(navigationTimeoutMs());
+        PlaywrightAssertions.setDefaultAssertionTimeout(assertionTimeoutMs());
         page.onDialog(dialog -> dialog.accept());
 
         homePage = new HomePage(page);
@@ -155,18 +317,54 @@ public class BaseTest {
         return email;
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void stopTracingAndClose(ITestResult result) {
         if (context == null) {
             return;
         }
 
-        String tracePath = "traces/" + result.getName() + "_" + System.currentTimeMillis() + ".zip";
-        context.tracing().stop(new Tracing.StopOptions().setPath(Paths.get(tracePath)));
+        String testName = (result != null && result.getName() != null && !result.getName().isBlank())
+                ? result.getName()
+                : "test";
+        boolean passed = result != null && result.isSuccess();
+
+        Video video = null;
+        try {
+            if (page != null) {
+                video = page.video();
+            }
+        } catch (Exception ignored) {
+        }
+
+        TracingMode tracingMode = tracingMode();
+        if (tracingMode != TracingMode.OFF) {
+            try {
+                Files.createDirectories(tracingDir());
+            } catch (Exception ignored) {
+            }
+
+            if (tracingMode == TracingMode.ON || (tracingMode == TracingMode.RETAIN_ON_FAILURE && !passed)) {
+                Path tracePath = tracingDir().resolve(testName + "_" + System.currentTimeMillis() + ".zip");
+                context.tracing().stop(new Tracing.StopOptions().setPath(tracePath));
+            } else {
+                context.tracing().stop();
+            }
+        }
+
+        // Video is recorded by context options; only decide whether to keep it.
+        VideoMode videoMode = videoMode();
+
         context.close();
+
+        if (videoMode == VideoMode.RETAIN_ON_FAILURE && passed && video != null) {
+            try {
+                video.delete();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
-    @AfterClass
+    @AfterClass(alwaysRun = true)
     public void tearDown() {
         if (browser != null) {
             browser.close();

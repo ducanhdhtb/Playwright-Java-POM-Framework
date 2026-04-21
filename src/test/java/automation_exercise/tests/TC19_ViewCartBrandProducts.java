@@ -7,7 +7,7 @@ import utils.ConfigReader;
 
 public class TC19_ViewCartBrandProducts extends BaseTest {
 
-    @Test(description = "Test Case 19: View & Cart Brand Products",priority = 19)
+    @Test(description = "Test Case 19: View & Cart Brand Products",priority = 19, groups = {"regression"})
     @Step("TC19: View brand products")
     public void viewCartBrandProducts() {
 

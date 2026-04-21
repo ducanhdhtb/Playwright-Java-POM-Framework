@@ -1,13 +1,13 @@
 
 ---
 
-#  Playwright Java Automation Framework
+# Playwright Java Automation Framework
 
-Dự án này là một Framework kiểm thử tự động (Automation Testing) hoàn chỉnh sử dụng **Playwright** với ngôn ngữ lập trình **Java**. Framework được xây dựng theo mô hình **Page Object Model (POM)**, tích hợp báo cáo **Allure**, hệ thống **Logging** chuyên nghiệp và tự động **Ghi hình/Chụp ảnh** khi bài test bị lỗi.
+Dự án này là framework automation dùng **Playwright Java + TestNG**, theo mô hình **Page Object Model (POM)**, có **Allure report**, chạy **data-driven từ Excel**, và cơ chế lưu **trace/video/screenshot** khi cần debug.
 
 ## 🛠 Công nghệ sử dụng
 
-* **Language:** Java 11+
+* **Language:** Java 17+
 * **Engine:** Playwright (Web Automation)
 * **Test Runner:** TestNG
 * **Report:** Allure Report
@@ -16,17 +16,19 @@ Dự án này là một Framework kiểm thử tự động (Automation Testing)
 
 ---
 
-## Cấu trúc Framework
+## Cấu trúc Framework (chính)
 
 ```text
-src/test/java/
-├── pages/          # Page Object Model: Quản lý Locators và Actions
-├── tests/          # Quản lý kịch bản test và BaseTest
-└── utils/          # Các tiện ích: ConfigReader, TestListener (Screenshot failure)
+src/main/java/pages/                     # Page Objects
+src/test/java/automation_exercise/        # BaseTest + E2E tests
+src/test/java/automation_exercise/tests/  # Test cases (TC*)
+src/test/java/utils/                      # Config, listeners, Excel helpers
 
 src/test/resources/
-├── config.properties   # Cấu hình môi trường (URL, Browser, Headless...)
-└── log4j2.xml          # Cấu hình hệ thống Logging
+├── config.properties                 # baseUrl + test defaults
+├── playwright.properties             # browser/timeouts/tracing/video/allure toggles
+├── AutomationTestData.xlsx           # data theo từng test case (TC1, TC2, ...)
+└── log4j2.xml                        # logging
 
 ```
 
@@ -36,9 +38,9 @@ src/test/resources/
 
 * **Page Object Model (POM):** Tách biệt rõ ràng giữa kịch bản test và các thành phần giao diện.
 * **Allure Reporting:** Báo cáo HTML trực quan với biểu đồ và các bước thực thi chi tiết.
-* **Automatic Screenshot:** Tự động chụp ảnh màn hình ngay khi bài test bị **Fail** thông qua TestNG Listeners.
-* **Video Recording:** Tự động ghi lại video quá trình chạy test cho từng kịch bản.
-* **Data-Driven:** Quản lý tham số môi trường dễ dàng thông qua file cấu hình `.properties`.
+* **Allure Steps + Screenshot mỗi step (tùy chọn):** bật/tắt bằng `playwright.properties` hoặc ENV/JVM.
+* **Video/Tracing retain-on-failure:** lưu artifact khi fail, dọn video khi pass.
+* **Data-Driven từ Excel:** mỗi test case map vào 1 sheet `TCx`.
 * **Professional Logging:** Theo dõi luồng chạy thông qua Log4j2 với các mức độ INFO, ERROR, WARN.
 
 ---
@@ -47,7 +49,7 @@ src/test/resources/
 
 ### 1. Yêu cầu hệ thống
 
-* Đã cài đặt **JDK 11** trở lên.
+* Đã cài đặt **JDK 17** trở lên.
 * Đã cài đặt **Maven**.
 * (Tùy chọn) IDE: IntelliJ IDEA.
 
@@ -62,13 +64,25 @@ mvn clean install -DskipTests
 
 ```
 
-### 3. Chạy kiểm thử và xem báo cáo
+### 3. Chạy test (groups/suite) và xem báo cáo
 
 ```bash
-# Bước 1: Chạy toàn bộ test kịch bản
+# Chạy toàn bộ test
 mvn clean test
 
-# Bước 2: Sinh báo cáo Allure và mở trên trình duyệt
+# Chạy smoke (nhanh)
+mvn test -Dtestng.groups=smoke
+
+# Chạy regression
+mvn test -Dtestng.groups=regression
+
+# Chạy e2e
+mvn test -Dtestng.groups=e2e
+
+# Chạy song song (TestNG suite riêng)
+mvn test -Dtestng.suiteXmlFile=testng-parallel.xml
+
+# Sinh báo cáo Allure và mở trên trình duyệt
 mvn allure:serve
 
 ```
@@ -84,4 +98,3 @@ Sau khi chạy xong, kết quả sẽ bao gồm:
 3. **Report:** Báo cáo tổng hợp tại giao diện Allure (đính kèm Screenshot nếu có lỗi).
 
 ---
-

@@ -9,7 +9,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC18_ViewCategoryProducts extends BaseTest {
 
-    @Test(description = "Test Case 18: View Category Products",priority = 18)
+    @Test(description = "Test Case 18: View Category Products",priority = 18, groups = {"regression"})
     @Step("TC18: View category products")
     public void viewCategoryProducts() {
         // 1-3. Launch and Verify Home Page & Categories

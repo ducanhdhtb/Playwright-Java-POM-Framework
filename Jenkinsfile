@@ -24,6 +24,10 @@ node {
   def repoUrl = 'https://github.com/ducanhdhtb/Playwright-Java-POM-Framework.git'
   def branchName = env.BRANCH_NAME ?: 'dev_jenkin'
   def emailTo = (env.EMAIL_TO?.trim()) ? env.EMAIL_TO.trim() : 'ducanhdhtb@gmail.com'
+  def testGroups = (env.TEST_GROUPS?.trim()) ? env.TEST_GROUPS.trim() : 'smoke'
+  def excludedGroups = (env.EXCLUDED_GROUPS?.trim()) ? env.EXCLUDED_GROUPS.trim() : ''
+  def testngSuite = (env.TESTNG_SUITE?.trim()) ? env.TESTNG_SUITE.trim() : 'testng.xml'
+  def playwrightHeadless = (env.PLAYWRIGHT_HEADLESS?.trim()) ? env.PLAYWRIGHT_HEADLESS.trim() : 'true'
   int installExitCode = 0
   int testExitCode = 0
   boolean failed = false
@@ -51,20 +55,6 @@ node {
         branches: [[name: "*/${branchName}"]],
         userRemoteConfigs: [[url: repoUrl]]
       ])
-      // Ensure StepLoggerListener exists to avoid TestNG classpath error
-      sh '''
-      mkdir -p src/test/java/utils
-      cat > src/test/java/utils/StepLoggerListener.java <<'EOF'
-package utils;
-import org.testng.IInvokedMethod;
-import org.testng.IInvokedMethodListener;
-import org.testng.ITestResult;
-public class StepLoggerListener implements IInvokedMethodListener {
-  @Override public void beforeInvocation(IInvokedMethod m, ITestResult r) {}
-  @Override public void afterInvocation(IInvokedMethod m, ITestResult r) {}
-}
-EOF
-      '''
       echo "[Checkout] Done"
     }
 
@@ -91,7 +81,10 @@ EOF
     stage('Run Test') {
       echo "[Run Test] Start"
       // returnStatus keeps the pipeline running so we still publish reports + send email.
-      testExitCode = sh(script: 'mvn -B clean test', returnStatus: true)
+      testExitCode = sh(
+        script: "mvn -B clean test -Dplaywright.headless='${playwrightHeadless}' -Dtestng.suiteXmlFile='${testngSuite}' -Dtestng.groups='${testGroups}' -Dtestng.excludedGroups='${excludedGroups}'",
+        returnStatus: true
+      )
       if (testExitCode != 0) {
         failed = true
         currentBuild.result = 'FAILURE'
@@ -136,6 +129,13 @@ EOF
       } catch (Exception e) {
         echo "[Report] Archive surefire reports failed: ${e.getClass().getName()}: ${e.message}"
       }
+
+      echo "[Report] Archive traces/videos..."
+      try {
+        archiveArtifacts artifacts: 'traces/**,target/videos/**', fingerprint: true, allowEmptyArchive: true
+      } catch (Exception e) {
+        echo "[Report] Archive traces/videos failed: ${e.getClass().getName()}: ${e.message}"
+      }
     }
 
     stage('Notify') {
@@ -156,6 +156,9 @@ EOF
         "Build: #${env.BUILD_NUMBER}\n" +
         "Branch: ${branchName}\n" +
         "URL: ${env.BUILD_URL}\n" +
+        "TestNGSuite: ${testngSuite}\n" +
+        "Groups: ${testGroups}\n" +
+        (excludedGroups ? ("ExcludedGroups: ${excludedGroups}\n") : "") +
         (total != null ? ("Tests: total=${total}, passed=${passed}, failed=${failedCount}, skipped=${skipped}\n") : "") +
         "InstallExitCode: ${installExitCode}\n" +
         "TestExitCode: ${testExitCode}\n" +

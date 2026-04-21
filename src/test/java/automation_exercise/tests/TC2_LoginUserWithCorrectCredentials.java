@@ -14,8 +14,9 @@ public class TC2_LoginUserWithCorrectCredentials extends BaseTest {
 
     @Test(
             priority = 2,
-            dataProvider = "validLoginDataProvider",
-            dataProviderClass = TestData.class
+            dataProvider = "tc2DataProvider",
+            dataProviderClass = TestData.class,
+            groups = {"smoke"}
     )
     @Step("TC2: Login with valid credentials")
     public void testLoginUserWithCorrectCredentials(String email, String password, String expectedUsername) {

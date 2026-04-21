@@ -4,14 +4,21 @@ import automation_exercise.BaseTest;
 import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.TestData;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC11_VerifySubscriptionInCart extends BaseTest {
 
-    @Test(description = "Test Case 11: Verify Subscription in Cart page",priority = 11)
+    @Test(
+            description = "Test Case 11: Verify Subscription in Cart page",
+            priority = 11,
+            dataProvider = "tc11DataProvider",
+            dataProviderClass = TestData.class,
+            groups = {"smoke"}
+    )
     @Step("TC11: Verify subscription on cart page")
-    public void verifySubscriptionInCart() {
+    public void verifySubscriptionInCart(String email) {
         // 1 & 2. Launch browser and Navigate to URL
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
@@ -29,7 +36,7 @@ public class TC11_VerifySubscriptionInCart extends BaseTest {
         cartPage.verifySubscriptionTitleIsVisible();
 
         // 7. Enter email address and click arrow button
-        cartPage.subscribe("cart_tester@example.com");
+        cartPage.subscribe(email);
 
         // 8. Verify success message 'You have been successfully subscribed!' is visible
         cartPage.verifySuccessMessage();

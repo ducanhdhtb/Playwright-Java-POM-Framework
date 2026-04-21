@@ -11,9 +11,20 @@ out/
 .DS_Store
 Thumbs.db
 
+# Allure (local artifacts)
+allure-results/
+allure-report/
+.allure/
+
+# Local auth/session artifacts
+auth.json
+
 # Logs & Videos (Nếu mày muốn giữ local không đẩy lên)
 logs/
 *.log
 
 # Playwright traces (zip)
 traces/
+
+# Playwright video artifacts
+**/videos/

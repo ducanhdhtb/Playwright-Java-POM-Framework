@@ -9,7 +9,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC12_AddProductsInCart extends BaseTest {
 
-    @Test(description = "Test Case 12: Add Products in Cart",priority = 12)
+    @Test(description = "Test Case 12: Add Products in Cart",priority = 12, groups = {"smoke"})
     @Step("TC12: Add products to cart")
     public void addProductsToCart() {
         // 1-3. Launch and Verify Home Page

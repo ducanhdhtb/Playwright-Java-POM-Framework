@@ -4,20 +4,33 @@ import automation_exercise.BaseTest;
 import org.testng.annotations.Test;
 import io.qameta.allure.Step;
 import utils.ConfigReader;
+import utils.TestData;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class E2EPurchaseTest extends BaseTest {
 
-    @Test(description = "Full E2E test: Search, Add to Cart, Register, Checkout, and Delete Account")
+    @Test(
+            description = "Full E2E test: Search, Add to Cart, Register, Checkout, and Delete Account",
+            dataProvider = "e2ePurchaseDataProvider",
+            dataProviderClass = TestData.class,
+            groups = {"e2e"}
+    )
     @Step("E2E: search product, register, checkout, and delete account")
-    public void testEndToEndProductOrderFlow() {
+    public void testEndToEndProductOrderFlow(
+            String searchKey,
+            String username,
+            String password, String day, String month, String year,
+            String lastName, String address, String state, String city, String zipcode, String mobile,
+            String comment,
+            String cardName, String cardNumber, String cvc, String expMonth, String expYear
+    ) {
         // 1. Navigate to URL and go to the products page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
         homePage.clickProducts();
 
         // 2. Search for a product, add it to the cart, and view the cart
-        productsPage.searchProduct("Blue Top");
+        productsPage.searchProduct(searchKey);
         productsPage.addFirstProductToCart();
         productsPage.clickViewCart();
 
@@ -26,10 +39,9 @@ public class E2EPurchaseTest extends BaseTest {
         cartPage.clickRegisterLoginOnModal();
 
         // 4. Register a new user with random email
-        String username = "E2E_User";
         signupLoginPage.fillSignupDetailsWithRandomEmail(username);
-        signupLoginPage.fillAccountInformation("a_strong_password", "10", "July", "2000");
-        signupLoginPage.fillAddressDetails(username, "Test", "123 Test Lane", "Texas", "Austin", "73301", "1234567890");
+        signupLoginPage.fillAccountInformation(password, day, month, year);
+        signupLoginPage.fillAddressDetails(username, lastName, address, state, city, zipcode, mobile);
         signupLoginPage.clickCreateAccount();
 
         // 5. Verify account creation and continue
@@ -45,11 +57,11 @@ public class E2EPurchaseTest extends BaseTest {
 
         // 8. Verify address details are correct and place the order
         assertThat(page.locator("#address_delivery")).isVisible(); // Verify address section is visible
-        checkoutPage.enterComment("This is an E2E Test Order");
+        checkoutPage.enterComment(comment);
         checkoutPage.clickPlaceOrder();
 
         // 9. Enter payment details and confirm the order
-        checkoutPage.enterPaymentDetails(username, "4100000000000000", "123", "01", "2025");
+        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
         checkoutPage.clickPayAndConfirm();
 
         // 10. Verify the order success message

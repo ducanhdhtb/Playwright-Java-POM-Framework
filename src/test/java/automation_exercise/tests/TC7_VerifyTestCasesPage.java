@@ -11,7 +11,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 public class TC7_VerifyTestCasesPage extends BaseTest {
 
-    @Test(priority = 7)
+    @Test(priority = 7, groups = {"regression"})
     @Step("TC7: Open the test cases page")
     public void testVerifyTestCasesPageNavigation() {
         // 1 & 2. Khởi tạo trình duyệt và điều hướng (Xử lý bởi BaseTest)

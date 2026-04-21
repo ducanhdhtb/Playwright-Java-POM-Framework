@@ -3,12 +3,17 @@ package pages;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.WaitUntilState;
 
 public abstract class BasePage {
     protected final Page page;
 
     protected BasePage(Page page) {
         this.page = page;
+    }
+
+    public Page getPage() {
+        return page;
     }
 
     protected Locator locator(String selector) {
@@ -40,10 +45,12 @@ public abstract class BasePage {
     }
 
     protected void navigate(String url) {
-        page.navigate(url);
+        // The demo site occasionally never fires the full "load" event in CI/headless.
+        // DOMCONTENTLOADED is usually sufficient and makes navigation less flaky.
+        page.navigate(url, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
     }
 
     protected void waitForUrl(String urlPattern) {
-        page.waitForURL(urlPattern);
+        page.waitForURL(urlPattern, new Page.WaitForURLOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
     }
 }

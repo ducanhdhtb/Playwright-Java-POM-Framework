@@ -6,15 +6,28 @@ import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.TestData;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC5_RegisterExistingEmailTest extends BaseTest {
 
-    @Test(priority = 5)
+    @Test(
+            priority = 5,
+            dataProvider = "tc5DataProvider",
+            dataProviderClass = TestData.class,
+            groups = {"regression"}
+    )
     @Step("TC5: Register with an existing email")
-    public void testRegisterWithExistingEmail() {
+    public void testRegisterWithExistingEmail(String name, String password, String expectedError) {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+
+        // Ensure the email is actually "existing" by creating a fresh user first.
+        String existingEmail = createLoggedInUser(name, password);
+        homePage.clickLogout();
+
+        // After logout the site lands on the Signup/Login page; go back to home for this TC's flow.
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
@@ -28,17 +41,12 @@ public class TC5_RegisterExistingEmailTest extends BaseTest {
                 new Page.GetByRoleOptions().setName("New User Signup!"))).isVisible();
 
         // 6. Enter name and already registered email address
-        // Sử dụng email bạn đã đăng ký ở Test Case 1/2
-        signupLoginPage.fillSignupForm("\u004e\u0067\u0075\u0079\u1ec5\u006e \u0110\u1ee9\u0063 \u0041\u006e\u0068", "ducanhdhtb@gmail.com");
+        signupLoginPage.fillSignupForm(name, existingEmail);
 
         // 7. Click 'Signup' button
         signupLoginPage.clickSignupButton();
 
-        // 8. Verify the signup flow continues to the account information page
-        assertThat(page.getByRole(AriaRole.HEADING,
-                new Page.GetByRoleOptions().setName("Enter Account Information"))).isVisible();
-
-        // Log ra console để xác nhận thêm (tùy chọn)
-        System.out.println("Lỗi xuất hiện: " + signupLoginPage.getSignupErrorMessage());
+        // 8. Verify the expected error is visible for existing email.
+        assertThat(page.getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
     }
 }

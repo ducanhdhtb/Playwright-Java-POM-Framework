@@ -8,6 +8,7 @@ import java.util.Properties;
 public class ConfigReader {
 
     private static final String DEFAULT_CONFIG_FILE = "config.properties";
+    private static final String DEFAULT_PLAYWRIGHT_CONFIG_FILE = "playwright.properties";
     private static final String ACTIVE_ENV = resolveEnvironment();
     private static final Properties properties = loadProperties();
 
@@ -19,6 +20,10 @@ public class ConfigReader {
 
         loadFromResource(loaded, DEFAULT_CONFIG_FILE);
         loadFromResource(loaded, "config-" + ACTIVE_ENV + ".properties");
+
+        // Optional Playwright-specific config (can override general config).
+        loadFromResource(loaded, DEFAULT_PLAYWRIGHT_CONFIG_FILE);
+        loadFromResource(loaded, "playwright-" + ACTIVE_ENV + ".properties");
 
         return loaded;
     }
