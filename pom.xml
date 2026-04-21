@@ -63,16 +63,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.2</version>
-        <configuration>
-          <argLine>
-            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
-          </argLine>
-          <suiteXmlFiles>
-            <suiteXmlFile>testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-        </configuration>
-      </plugin>
+	        <version>3.1.2</version>
+	        <configuration>
+	          <argLine>
+	            --add-opens java.base/java.lang=ALL-UNNAMED
+	            --add-opens java.base/java.lang.invoke=ALL-UNNAMED
+	            -Dorg.aspectj.weaver.loadtime.configuration=META-INF/aop.xml
+	            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+	          </argLine>
+	          <suiteXmlFiles>
+	            <suiteXmlFile>testng.xml</suiteXmlFile>
+	          </suiteXmlFiles>
+	        </configuration>
+	      </plugin>
 
       <!-- Copy AspectJ Weaver (This might be redundant now, but safe to keep) -->
       <plugin>
@@ -147,15 +150,15 @@
     </dependency>
 
     <!-- Allure -->
-    <dependency>
-      <groupId>io.qameta.allure</groupId>
-      <artifactId>allure-testng</artifactId>
-      <version>2.24.0</version>
-    </dependency>
+	    <dependency>
+	      <groupId>io.qameta.allure</groupId>
+	      <artifactId>allure-testng</artifactId>
+	      <version>2.24.0</version>
+	    </dependency>
 
-    <!-- AspectJ runtime for test aspects (StepAspect) -->
-    <dependency>
-      <groupId>org.aspectj</groupId>
+	    <!-- AspectJ runtime for test aspects (StepAspect) -->
+	    <dependency>
+	      <groupId>org.aspectj</groupId>
       <artifactId>aspectjrt</artifactId>
       <version>${aspectj.version}</version>
       <!-- <scope>test</scope> -->

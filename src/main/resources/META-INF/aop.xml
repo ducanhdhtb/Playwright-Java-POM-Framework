@@ -2,8 +2,10 @@
         "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
     <weaver>
-        <!-- Weave all classes in the 'utils' package and its subpackages -->
+        <!-- Enable weaving for test code + Page Objects so Allure @Step works. -->
         <include within="utils..*"/>
+        <include within="pages..*"/>
+        <include within="automation_exercise..*"/>
     </weaver>
     <aspects>
         <!-- Specify the exact aspect class to be used -->

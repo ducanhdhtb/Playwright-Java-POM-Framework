@@ -1,6 +1,7 @@
 package utils;
 
 import io.qameta.allure.Step;
+import io.qameta.allure.Allure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -58,7 +59,7 @@ public class StepLoggerAspect {
         
         logger.info("STEP: " + stepDescription);
 
-        // Proceed with the original method execution
-        return joinPoint.proceed();
+        // Create a real Allure step without relying on Allure's AspectJ aspects.
+        return Allure.step(stepDescription, (Allure.ThrowableRunnable<Object>) joinPoint::proceed);
     }
 }
