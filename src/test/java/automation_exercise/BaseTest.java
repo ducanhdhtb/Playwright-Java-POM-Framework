@@ -21,6 +21,7 @@ import pages.ProductsPage;
 import pages.SignupLoginPage;
 import pages.CheckoutPage;
 import utils.ConfigReader;
+import utils.CookieManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -325,6 +326,42 @@ public class BaseTest {
                 "1234567890");
         accountPage.clickCreateAccount();
         page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
+        return email;
+    }
+
+    // ── Cookie session helpers ────────────────────────────────────────────────
+
+    /**
+     * Save current browser session cookies under a given name.
+     * Use after login to reuse the session in other tests.
+     */
+    @Step("Saving session as '{0}'")
+    protected void saveSession(String sessionName) {
+        CookieManager.save(context, sessionName);
+    }
+
+    /**
+     * Restore a previously saved cookie session into the current context.
+     * Call before page.navigate() to skip the login flow.
+     */
+    @Step("Restoring session '{0}'")
+    protected void restoreSession(String sessionName) {
+        CookieManager.restore(context, sessionName);
+    }
+
+    /**
+     * Login via API-created user, save session cookies, return email.
+     * Subsequent tests can call restoreSession() to skip login UI.
+     */
+    @Step("Login and save session as '{1}'")
+    protected String loginAndSaveSession(String name, String password, String sessionName) {
+        String email = userApi.setupUser(name, password);
+        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.clickSignupLogin();
+        signupLoginPage.fillLoginForm(email, password);
+        signupLoginPage.clickLoginButton();
+        homePage.verifyLoggedInAs(name);
+        saveSession(sessionName);
         return email;
     }
 
