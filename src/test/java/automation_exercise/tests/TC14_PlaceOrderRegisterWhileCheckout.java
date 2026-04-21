@@ -4,14 +4,26 @@ import automation_exercise.BaseTest;
 import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.TestData;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC14_PlaceOrderRegisterWhileCheckout extends BaseTest {
 
-    @Test(description = "Test Case 14: Place Order: Register while Checkout",priority = 14)
+    @Test(
+            description = "Test Case 14: Place Order: Register while Checkout",
+            priority = 14,
+            dataProvider = "tc14DataProvider",
+            dataProviderClass = TestData.class
+    )
     @Step("TC14: Register while checkout and place order")
-    public void placeOrderWithRegistration() {
+    public void placeOrderWithRegistration(
+            String user,
+            String password, String day, String month, String year,
+            String lastName, String address, String state, String city, String zipcode, String mobile,
+            String comment,
+            String cardName, String cardNumber, String cvc, String expMonth, String expYear
+    ) {
         // 1-3. Launch and Verify Home Page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
         assertThat(page).hasTitle("Automation Exercise");
@@ -26,13 +38,9 @@ public class TC14_PlaceOrderRegisterWhileCheckout extends BaseTest {
         cartPage.clickRegisterLoginModal();
 
         // 9-10. Signup Process (Simplified for brevity)
-        // signupPage.fillSignupDetails("Automation Test", "aoto_test@test.com");
-        String user = "Automation Test";
         signupPage.fillSignupDetailsWithRandomEmail(user);
-
-
-        signupPage.fillAccountInformation("Password123", "1", "January", "1990");
-        signupPage.fillAddressDetails(user, "Auto", "119 Trần duy hưng", "VN", "Hà Nội", "94043", "0123456789");
+        signupPage.fillAccountInformation(password, day, month, year);
+        signupPage.fillAddressDetails(user, lastName, address, state, city, zipcode, mobile);
         signupPage.clickCreateAccount();
         assertThat(page.locator("h2:has-text('Account Created!')")).isVisible();
         page.click("a[data-qa='continue-button']");
@@ -46,11 +54,11 @@ public class TC14_PlaceOrderRegisterWhileCheckout extends BaseTest {
         // Verify address logic here...
 
         // 15. Place Order with Comment
-        checkoutPage.enterComment("Please deliver during business hours.");
+        checkoutPage.enterComment(comment);
         checkoutPage.clickPlaceOrder();
 
         // 16-18. Payment and Success
-        checkoutPage.enterPaymentDetails(user, "411111111111", "123", "12", "2028");
+        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
         checkoutPage.clickPayAndConfirm();
         checkoutPage.verifyOrderSuccess();
 

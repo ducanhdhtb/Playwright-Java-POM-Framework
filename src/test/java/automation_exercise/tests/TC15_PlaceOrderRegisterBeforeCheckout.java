@@ -4,14 +4,28 @@ import automation_exercise.BaseTest;
 import io.qameta.allure.Step;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.TestData;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
 
-    @Test(description = "Test Case 15: Place Order: Register before Checkout",priority = 15)
+    @Test(
+            description = "Test Case 15: Place Order: Register before Checkout",
+            priority = 15,
+            dataProvider = "tc15DataProvider",
+            dataProviderClass = TestData.class
+    )
     @Step("TC15: Register before checkout and place order")
-    public void placeOrderRegisterBeforeCheckout() {
+    public void placeOrderRegisterBeforeCheckout(
+            String username,
+            String emailPrefix,
+            String password, String day, String month, String year,
+            String firstName, String lastName, String address, String state, String city, String zipcode, String mobile,
+            String productIndex,
+            String comment,
+            String cardName, String cardNumber, String cvc, String expMonth, String expYear
+    ) {
         // 1-3. Launch and Verify Home Page
         homePage.navigate(ConfigReader.getProperty("baseUrl"));
         assertThat(page).hasTitle("Automation Exercise");
@@ -20,12 +34,11 @@ public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
         homePage.clickSignupLogin();
 
         // 5. Fill all details in Signup and create account
-        String username = "Herry";
-        String email = "user_pro_" + System.currentTimeMillis() + "@test.com"; // Email ngẫu nhiên
+        String email = (emailPrefix == null ? "user_pro_" : emailPrefix) + System.currentTimeMillis() + "@test.com";
 
         signupLoginPage.fillSignupDetails(username, email);
-        signupLoginPage.fillAccountInformation("Password123", "15", "May", "1995");
-        signupLoginPage.fillAddressDetails("Herry", "Mr", "1600 Amphitheatre", "California", "Mountain View", "94043", "0987654321");
+        signupLoginPage.fillAccountInformation(password, day, month, year);
+        signupLoginPage.fillAddressDetails(firstName, lastName, address, state, city, zipcode, mobile);
         signupLoginPage.clickCreateAccount();
 
         // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
@@ -38,7 +51,7 @@ public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
         // 8. Add products to cart
         // Giả sử ta thêm sản phẩm đầu tiên bằng logic hover đã xây dựng
         homePage.clickProducts();
-        productsPage.addProductToCartByIndex(0);
+        productsPage.addProductToCartByIndex(Integer.parseInt(productIndex));
         productsPage.clickContinueShopping();
 
         // 9-10. Click 'Cart' button and Verify cart page
@@ -52,11 +65,11 @@ public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
         // (Thực hiện verify nội dung địa chỉ nếu cần thiết)
 
         // 13. Enter description in comment and click 'Place Order'
-        checkoutPage.enterComment("Please deliver by evening.");
+        checkoutPage.enterComment(comment);
         checkoutPage.clickPlaceOrder();
 
         // 14-15. Enter payment details and Confirm
-        checkoutPage.enterPaymentDetails("Herry", "411111111111", "123", "12", "2028");
+        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
         checkoutPage.clickPayAndConfirm();
 
         // 16. Verify success message 'Your order has been placed successfully!'
