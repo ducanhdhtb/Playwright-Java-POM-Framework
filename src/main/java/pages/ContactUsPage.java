@@ -1,11 +1,15 @@
 package pages;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.WaitForSelectorState;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import java.nio.file.Path;
 
 public class ContactUsPage extends BasePage {
+
+    private static final String SUCCESS_MESSAGE = "#contact-page .status.alert.alert-success";
 
     public ContactUsPage(Page page) {
         super(page);
@@ -27,6 +31,14 @@ public class ContactUsPage extends BasePage {
     @Step("Clicking 'Submit' button and accepting alert")
     public void clickSubmit() {
         page.locator("input[data-qa='submit-button']").click();
+    }
+
+    @Step("Waiting for contact form success message")
+    public void waitForSuccessMessageVisible() {
+        Locator msg = page.locator(SUCCESS_MESSAGE);
+        msg.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(15_000));
     }
 
     @Step("Clicking 'Home' button from contact page")

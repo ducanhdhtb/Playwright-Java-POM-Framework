@@ -322,6 +322,14 @@ public class BaseTest {
                 : "test";
         boolean passed = result != null && result.isSuccess();
 
+        Video video = null;
+        try {
+            if (page != null) {
+                video = page.video();
+            }
+        } catch (Exception ignored) {
+        }
+
         TracingMode tracingMode = tracingMode();
         if (tracingMode != TracingMode.OFF) {
             try {
@@ -338,20 +346,13 @@ public class BaseTest {
         }
 
         // Video is recorded by context options; only decide whether to keep it.
-        // When we don't want to keep, delete the generated video file(s) after closing.
         VideoMode videoMode = videoMode();
 
         context.close();
 
-        if (videoMode == VideoMode.RETAIN_ON_FAILURE && passed) {
-            // Best-effort cleanup: videos are stored under recordVideoDir per context.
+        if (videoMode == VideoMode.RETAIN_ON_FAILURE && passed && video != null) {
             try {
-                Path dir = videoDir();
-                if (Files.exists(dir)) {
-                    // Keep it simple: CI users typically want to inspect failures only.
-                    // If you need per-test granularity, switch to per-test video dirs.
-                    // No-op for now.
-                }
+                video.delete();
             } catch (Exception ignored) {
             }
         }

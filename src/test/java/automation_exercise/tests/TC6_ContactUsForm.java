@@ -50,6 +50,7 @@ public class TC6_ContactUsForm extends BaseTest {
         contactPage.clickSubmit();
 
 	        // 10. Verify success message is visible
+            contactPage.waitForSuccessMessageVisible();
 	        assertThat(page.locator("#contact-page .status.alert.alert-success"))
 	                .containsText(expectedSuccessText);
 

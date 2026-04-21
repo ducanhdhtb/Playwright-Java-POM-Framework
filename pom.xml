@@ -110,6 +110,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Silence SLF4J "StaticLoggerBinder" warning coming from TestNG's slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.7.36</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Log4j -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

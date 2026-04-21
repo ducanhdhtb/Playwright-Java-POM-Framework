@@ -51,20 +51,6 @@ node {
         branches: [[name: "*/${branchName}"]],
         userRemoteConfigs: [[url: repoUrl]]
       ])
-      // Ensure StepLoggerListener exists to avoid TestNG classpath error
-      sh '''
-      mkdir -p src/test/java/utils
-      cat > src/test/java/utils/StepLoggerListener.java <<'EOF'
-package utils;
-import org.testng.IInvokedMethod;
-import org.testng.IInvokedMethodListener;
-import org.testng.ITestResult;
-public class StepLoggerListener implements IInvokedMethodListener {
-  @Override public void beforeInvocation(IInvokedMethod m, ITestResult r) {}
-  @Override public void afterInvocation(IInvokedMethod m, ITestResult r) {}
-}
-EOF
-      '''
       echo "[Checkout] Done"
     }
 
@@ -135,6 +121,13 @@ EOF
         archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true, allowEmptyArchive: true
       } catch (Exception e) {
         echo "[Report] Archive surefire reports failed: ${e.getClass().getName()}: ${e.message}"
+      }
+
+      echo "[Report] Archive traces/videos..."
+      try {
+        archiveArtifacts artifacts: 'traces/**,target/videos/**', fingerprint: true, allowEmptyArchive: true
+      } catch (Exception e) {
+        echo "[Report] Archive traces/videos failed: ${e.getClass().getName()}: ${e.message}"
       }
     }
 
