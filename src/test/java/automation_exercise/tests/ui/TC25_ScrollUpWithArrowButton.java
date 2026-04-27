@@ -22,26 +22,26 @@ public class TC25_ScrollUpWithArrowButton extends BaseTest {
     @Step("TC25: Scroll down then scroll up via arrow button")
     public void testScrollUpWithArrowButton() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Scroll down to bottom
-        homePage.scrollToBottom();
+        homePage.get().scrollToBottom();
 
         // 5. Verify SUBSCRIPTION is visible
-        homePage.verifySubscriptionTitleIsVisible();
+        homePage.get().verifySubscriptionTitleIsVisible();
 
         // 6. Click scroll-up arrow button
         // Wait for the button to become visible after scrolling
-        page.locator("#scrollUp").waitFor(
+        getPage().locator("#scrollUp").waitFor(
                 new com.microsoft.playwright.Locator.WaitForOptions()
                         .setState(com.microsoft.playwright.options.WaitForSelectorState.VISIBLE)
                         .setTimeout(10_000)
         );
-        homePage.clickScrollUpArrow();
+        homePage.get().clickScrollUpArrow();
 
         // 7. Verify page scrolled up — hero text visible
-        page.waitForTimeout(1000); // allow scroll animation
-        homePage.verifyHeroText("Full-Fledged practice website for Automation Engineers");
+        getPage().waitForTimeout(1000); // allow scroll animation
+        homePage.get().verifyHeroText("Full-Fledged practice website for Automation Engineers");
     }
 }

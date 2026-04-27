@@ -25,37 +25,37 @@ public class TC16_PlaceOrderLoginBeforeCheckout extends BaseTest {
             String comment,
             String cardName, String cardNumber, String cvc, String expMonth, String expYear
     ) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         String loginEmail = createLoggedInUser(user, password);
-        homePage.clickLogout();
+        homePage.get().clickLogout();
 
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(loginEmail, password);
-        signupLoginPage.clickLoginButton();
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(loginEmail, password);
+        signupLoginPage.get().clickLoginButton();
 
-        homePage.verifyLoggedInAs(user);
+        homePage.get().verifyLoggedInAs(user);
 
-        homePage.clickProducts();
-        productsPage.addProductToCartByIndex(Integer.parseInt(productIndex));
-        productsPage.clickContinueShopping();
+        homePage.get().clickProducts();
+        productsPage.get().addProductToCartByIndex(Integer.parseInt(productIndex));
+        productsPage.get().clickContinueShopping();
 
-        homePage.clickCart();
-        assertThat(page).hasURL("https://automationexercise.com/view_cart");
+        homePage.get().clickCart();
+        assertThat(getPage()).hasURL("https://automationexercise.com/view_cart");
 
-        cartPage.clickProceedToCheckout();
+        cartPage.get().clickProceedToCheckout();
 
-        checkoutPage.enterComment(comment);
-        checkoutPage.clickPlaceOrder();
+        checkoutPage.get().enterComment(comment);
+        checkoutPage.get().clickPlaceOrder();
 
-        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
-        checkoutPage.clickPayAndConfirm();
+        checkoutPage.get().enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
+        checkoutPage.get().clickPayAndConfirm();
 
-        checkoutPage.verifyOrderSuccess();
+        checkoutPage.get().verifyOrderSuccess();
 
-        homePage.deleteAccount();
-        assertThat(page.locator("h2:has-text('Account Deleted!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        homePage.get().deleteAccount();
+        assertThat(getPage().locator("h2:has-text('Account Deleted!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
     }
 }

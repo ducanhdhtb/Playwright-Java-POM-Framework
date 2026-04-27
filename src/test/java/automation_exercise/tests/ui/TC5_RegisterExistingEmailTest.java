@@ -21,32 +21,32 @@ public class TC5_RegisterExistingEmailTest extends BaseTest {
     @Step("TC5: Register with an existing email")
     public void testRegisterWithExistingEmail(String name, String password, String expectedError) {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // Ensure the email is actually "existing" by creating a fresh user first.
         String existingEmail = createLoggedInUser(name, password);
-        homePage.clickLogout();
+        homePage.get().clickLogout();
 
         // After logout the site lands on the Signup/Login page; go back to home for this TC's flow.
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click on 'Signup / Login' button
-        homePage.clickSignupLogin();
+        homePage.get().clickSignupLogin();
 
         // 5. Verify 'New User Signup!' is visible
-        assertThat(page.getByRole(AriaRole.HEADING,
+        assertThat(getPage().getByRole(AriaRole.HEADING,
                 new Page.GetByRoleOptions().setName("New User Signup!"))).isVisible();
 
         // 6. Enter name and already registered email address
-        signupLoginPage.fillSignupForm(name, existingEmail);
+        signupLoginPage.get().fillSignupForm(name, existingEmail);
 
         // 7. Click 'Signup' button
-        signupLoginPage.clickSignupButton();
+        signupLoginPage.get().clickSignupButton();
 
         // 8. Verify the expected error is visible for existing email.
-        assertThat(page.getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(getPage().getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
     }
 }

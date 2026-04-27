@@ -33,7 +33,7 @@ public class TC41_CookieSessionTests extends BaseTest {
     public void cleanupSession() {
         // Cleanup: delete user via API and clear saved cookie file
         if (savedEmail != null) {
-            userApi.teardownUser(savedEmail, PASSWORD);
+            userApi.get().teardownUser(savedEmail, PASSWORD);
         }
         CookieManager.clear(SESSION_NAME);
     }
@@ -47,14 +47,14 @@ public class TC41_CookieSessionTests extends BaseTest {
     @Step("TC41a: Login and save session")
     public void testLoginAndSaveSession() {
         // Create user via API
-        savedEmail = userApi.setupUser(USERNAME, PASSWORD);
+        savedEmail = userApi.get().setupUser(USERNAME, PASSWORD);
 
         // Login via UI
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(savedEmail, PASSWORD);
-        signupLoginPage.clickLoginButton();
-        homePage.verifyLoggedInAs(USERNAME);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(savedEmail, PASSWORD);
+        signupLoginPage.get().clickLoginButton();
+        homePage.get().verifyLoggedInAs(USERNAME);
 
         // Save session cookies
         saveSession(SESSION_NAME);
@@ -77,11 +77,11 @@ public class TC41_CookieSessionTests extends BaseTest {
         restoreSession(SESSION_NAME);
 
         // Navigate to home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // Should be logged in already
-        homePage.verifyLoggedInAs(USERNAME);
-        assertThat(page.locator("#header")).containsText("Logged in as " + USERNAME);
+        homePage.get().verifyLoggedInAs(USERNAME);
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + USERNAME);
     }
 
     @Test(
@@ -96,17 +96,17 @@ public class TC41_CookieSessionTests extends BaseTest {
         restoreSession(SESSION_NAME);
 
         // Navigate to multiple pages and verify still logged in
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.verifyLoggedInAs(USERNAME);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().verifyLoggedInAs(USERNAME);
 
-        homePage.clickProducts();
-        assertThat(page.locator("#header")).containsText("Logged in as " + USERNAME);
+        homePage.get().clickProducts();
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + USERNAME);
 
-        homePage.clickCart();
-        assertThat(page.locator("#header")).containsText("Logged in as " + USERNAME);
+        homePage.get().clickCart();
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + USERNAME);
 
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page.locator("#header")).containsText("Logged in as " + USERNAME);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + USERNAME);
     }
 
     @Test(
@@ -119,17 +119,17 @@ public class TC41_CookieSessionTests extends BaseTest {
     @Step("TC41d: Cart works with restored session")
     public void testCartWorksWithRestoredSession() {
         restoreSession(SESSION_NAME);
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.verifyLoggedInAs(USERNAME);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().verifyLoggedInAs(USERNAME);
 
         // Add product to cart
-        homePage.clickProducts();
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        homePage.get().clickProducts();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // Verify product in cart and still logged in
-        cartPage.verifyCartCount(1);
-        assertThat(page.locator("#header")).containsText("Logged in as " + USERNAME);
+        cartPage.get().verifyCartCount(1);
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + USERNAME);
     }
 
     @Test(
@@ -143,16 +143,16 @@ public class TC41_CookieSessionTests extends BaseTest {
     public void testSessionInvalidatedAfterLogout() {
         // Restore and verify logged in
         restoreSession(SESSION_NAME);
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.verifyLoggedInAs(USERNAME);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().verifyLoggedInAs(USERNAME);
 
         // Logout
-        homePage.clickLogout();
-        assertThat(page).hasURL(
+        homePage.get().clickLogout();
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*(login|signup).*"));
 
         // Navigate to home — should NOT be logged in anymore
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page.locator("#header")).not().containsText("Logged in as");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage().locator("#header")).not().containsText("Logged in as");
     }
 }

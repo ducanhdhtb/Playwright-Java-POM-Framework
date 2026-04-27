@@ -7,6 +7,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import utils.ExcelReader;
 
 import static org.testng.Assert.*;
 
@@ -20,12 +21,7 @@ public class TC_API06_SearchProduct extends BaseApiTest {
 
     @DataProvider(name = "searchKeywords")
     public Object[][] searchKeywords() {
-        return new Object[][]{
-                {"top"},
-                {"dress"},
-                {"tshirt"},
-                {"jean"}
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "searchKeywords");
     }
 
     // ── API 5: Search with valid keyword ─────────────────────────────────────

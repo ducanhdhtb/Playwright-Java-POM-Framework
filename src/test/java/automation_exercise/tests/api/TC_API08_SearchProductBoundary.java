@@ -7,6 +7,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import utils.ExcelReader;
 
 import java.util.Map;
 
@@ -30,21 +31,12 @@ public class TC_API08_SearchProductBoundary extends BaseApiTest {
 
     @DataProvider(name = "validKeywords")
     public Object[][] validKeywords() {
-        return new Object[][]{
-                {"top"},
-                {"dress"},
-                {"t"},       // BVA: single char
-                {"jean"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "validKeywords");
     }
 
     @DataProvider(name = "noResultKeywords")
     public Object[][] noResultKeywords() {
-        return new Object[][]{
-                {"xyzzy_notexist_12345"},
-                {"123"},
-                {"@@@"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "noResultKeywords");
     }
 
     // ── EP1/BVA: Valid keywords ───────────────────────────────────────────────

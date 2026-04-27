@@ -25,19 +25,19 @@ public class TC23_CartManagement extends BaseTest {
     @Description("Adds two different products to cart and verifies cart shows 2 items")
     @Step("TC23a: Add two products and verify cart count")
     public void testAddMultipleProductsToCart() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
         // Add first product
-        productsPage.addProductToCartByIndex(0);
-        productsPage.clickContinueShopping();
+        productsPage.get().addProductToCartByIndex(0);
+        productsPage.get().clickContinueShopping();
 
         // Add second product
-        productsPage.addProductToCartByIndex(1);
-        productsPage.clickViewCart();
+        productsPage.get().addProductToCartByIndex(1);
+        productsPage.get().clickViewCart();
 
         // Verify 2 items in cart
-        cartPage.verifyCartCount(2);
+        cartPage.get().verifyCartCount(2);
     }
 
     @Test(
@@ -47,20 +47,20 @@ public class TC23_CartManagement extends BaseTest {
     @Description("Adds one product, removes it, and verifies the cart is empty")
     @Step("TC23b: Remove product from cart")
     public void testRemoveProductFromCart() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // Verify 1 item before removal
-        cartPage.verifyCartCount(1);
+        cartPage.get().verifyCartCount(1);
 
         // Remove the product
-        cartPage.removeProductByIndex(0);
+        cartPage.get().removeProductByIndex(0);
 
         // Verify cart is now empty
-        cartPage.verifyProductIsRemoved();
+        cartPage.get().verifyProductIsRemoved();
     }
 
     @Test(
@@ -74,31 +74,31 @@ public class TC23_CartManagement extends BaseTest {
         String password = "Password123";
 
         // Setup user via API
-        String email = userApi.setupUser(name, password);
+        String email = userApi.get().setupUser(name, password);
 
         try {
             // 1. Navigate and add product as guest
-            homePage.navigate(ConfigReader.getProperty("baseUrl"));
-            homePage.clickProducts();
-            productsPage.addFirstProductToCart();
-            productsPage.clickViewCart();
+            homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+            homePage.get().clickProducts();
+            productsPage.get().addFirstProductToCart();
+            productsPage.get().clickViewCart();
 
             // 2. Proceed to checkout — triggers login modal
-            cartPage.proceedToCheckout();
-            cartPage.clickRegisterLoginOnModal();
+            cartPage.get().proceedToCheckout();
+            cartPage.get().clickRegisterLoginOnModal();
 
             // 3. Login with API-created user
-            signupLoginPage.fillLoginForm(email, password);
-            signupLoginPage.clickLoginButton();
+            signupLoginPage.get().fillLoginForm(email, password);
+            signupLoginPage.get().clickLoginButton();
 
             // 4. Navigate back to cart
-            homePage.clickCart();
+            homePage.get().clickCart();
 
             // 5. Verify cart page loads correctly
-            assertThat(page).hasURL(
+            assertThat(getPage()).hasURL(
                     java.util.regex.Pattern.compile(".*view_cart.*"));
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 }

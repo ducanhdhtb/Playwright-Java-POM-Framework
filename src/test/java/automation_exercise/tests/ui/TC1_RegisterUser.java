@@ -25,29 +25,29 @@ public class TC1_RegisterUser extends BaseTest {
             String state, String city, String zipcode, String mobile
     ) {
         // 1. Navigate to URL and click Signup / Login
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
 
         // 2. Fill signup form with a random email
         String email = "user_" + System.currentTimeMillis() + "@example.com";
-        signupLoginPage.fillSignupForm(name, email);
-        signupLoginPage.clickSignupButton();
+        signupLoginPage.get().fillSignupForm(name, email);
+        signupLoginPage.get().clickSignupButton();
 
         // 3. Fill account and address details from data provider
-        accountPage.fillAccountDetails(password, day, month, year);
-        accountPage.fillAddressDetails(firstName, lastName, company, address, country, state, city, zipcode, mobile);
-        accountPage.clickCreateAccount();
+        accountPage.get().fillAccountDetails(password, day, month, year);
+        accountPage.get().fillAddressDetails(firstName, lastName, company, address, country, state, city, zipcode, mobile);
+        accountPage.get().clickCreateAccount();
 
         // 4. Verify account creation and continue
-        assertThat(page.getByText("Account Created!")).isVisible();
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
+        assertThat(getPage().getByText("Account Created!")).isVisible();
+        getPage().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
 
         // 5. Verify successful login
-        assertThat(page.locator("#header")).containsText("Logged in as " + name);
+        assertThat(getPage().locator("#header")).containsText("Logged in as " + name);
 
         // 6. Cleanup: Delete the account to keep the environment clean
-        homePage.deleteAccount();
-        assertThat(page.getByText("Account Deleted!")).isVisible();
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
+        homePage.get().deleteAccount();
+        assertThat(getPage().getByText("Account Deleted!")).isVisible();
+        getPage().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
     }
 }

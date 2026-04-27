@@ -25,43 +25,43 @@ public class TC30_DownloadInvoiceAfterOrder extends BaseTest {
     @Step("TC30: Download invoice after purchase")
     public void testDownloadInvoiceAfterOrder() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Add product to cart
-        homePage.clickProducts();
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        homePage.get().clickProducts();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // 5. Proceed to checkout → Register
-        cartPage.proceedToCheckout();
-        cartPage.clickRegisterLoginOnModal();
+        cartPage.get().proceedToCheckout();
+        cartPage.get().clickRegisterLoginOnModal();
 
         // 6. Register new user
         String user = "InvoiceUser";
-        signupPage.fillSignupDetailsWithRandomEmail(user);
-        signupPage.fillAccountInformation("Password123", "10", "July", "1990");
-        signupPage.fillAddressDetails(user, "Tester", "123 Invoice St", "Texas", "Austin", "73301", "1234567890");
-        signupPage.clickCreateAccount();
-        assertThat(page.locator("h2:has-text('Account Created!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        signupPage.get().fillSignupDetailsWithRandomEmail(user);
+        signupPage.get().fillAccountInformation("Password123", "10", "July", "1990");
+        signupPage.get().fillAddressDetails(user, "Tester", "123 Invoice St", "Texas", "Austin", "73301", "1234567890");
+        signupPage.get().clickCreateAccount();
+        assertThat(getPage().locator("h2:has-text('Account Created!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
 
         // 7. Go back to cart and checkout
-        homePage.clickCart();
-        cartPage.proceedToCheckout();
+        homePage.get().clickCart();
+        cartPage.get().proceedToCheckout();
 
         // 8. Place order
-        checkoutPage.enterComment("Invoice test order");
-        checkoutPage.clickPlaceOrder();
-        checkoutPage.enterPaymentDetails("Invoice User", "4111111111111111", "123", "12", "2027");
-        checkoutPage.clickPayAndConfirm();
+        checkoutPage.get().enterComment("Invoice test order");
+        checkoutPage.get().clickPlaceOrder();
+        checkoutPage.get().enterPaymentDetails("Invoice User", "4111111111111111", "123", "12", "2027");
+        checkoutPage.get().clickPayAndConfirm();
 
         // 9. Verify order success
-        checkoutPage.verifyOrderSuccess();
+        checkoutPage.get().verifyOrderSuccess();
 
         // 10. Click Download Invoice and verify download
-        Download download = page.waitForDownload(() -> {
-            checkoutPage.clickDownloadInvoice();
+        Download download = getPage().waitForDownload(() -> {
+            checkoutPage.get().clickDownloadInvoice();
         });
         assertNotNull(download, "Download should not be null");
         assertTrue(download.suggestedFilename().contains("invoice") ||
@@ -70,9 +70,9 @@ public class TC30_DownloadInvoiceAfterOrder extends BaseTest {
                 "Downloaded file should have a valid name: " + download.suggestedFilename());
 
         // 11. Continue and cleanup
-        page.click("a[data-qa='continue-button']");
-        homePage.deleteAccount();
-        assertThat(page.locator("h2:has-text('Account Deleted!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        getPage().click("a[data-qa='continue-button']");
+        homePage.get().deleteAccount();
+        assertThat(getPage().locator("h2:has-text('Account Deleted!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
     }
 }

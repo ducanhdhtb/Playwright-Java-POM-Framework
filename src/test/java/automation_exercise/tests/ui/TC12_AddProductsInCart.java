@@ -13,28 +13,28 @@ public class TC12_AddProductsInCart extends BaseTest {
     @Step("TC12: Add products to cart")
     public void addProductsToCart() {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click 'Products' button
-        homePage.clickProducts();
+        homePage.get().clickProducts();
 
         // 5-6. Add first product and continue
-        productsPage.addProductToCartByIndex(0);
-        productsPage.clickContinueShopping();
+        productsPage.get().addProductToCartByIndex(0);
+        productsPage.get().clickContinueShopping();
 
         // 7. Add second product
-        productsPage.addProductToCartByIndex(1);
+        productsPage.get().addProductToCartByIndex(1);
 
         // 8. Click 'View Cart' button
-        productsPage.clickViewCart();
+        productsPage.get().clickViewCart();
 
         // 9. Verify both products are added
-        cartPage.verifyCartCount(2);
+        cartPage.get().verifyCartCount(2);
 
         // 10. Verify their prices, quantity and total price
         // Note: Prices are hardcoded here based on the specific site data for item 1 and 2
-        cartPage.verifyProductDetails(0, "Rs. 500", "1", "Rs. 500");
-        cartPage.verifyProductDetails(1, "Rs. 400", "1", "Rs. 400");
+        cartPage.get().verifyProductDetails(0, "Rs. 500", "1", "Rs. 500");
+        cartPage.get().verifyProductDetails(1, "Rs. 400", "1", "Rs. 400");
     }
 }

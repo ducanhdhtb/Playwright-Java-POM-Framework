@@ -6,6 +6,7 @@ import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.ExcelReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -25,39 +26,29 @@ public class TC40_PaymentFieldValidation extends BaseTest {
 
     @DataProvider(name = "validPaymentData")
     public static Object[][] validPaymentData() {
-        return new Object[][]{
-                // name, card, cvc, month, year — all valid
-                {"John Doe",  "4111111111111111", "123", "12", "2027"},  // EP: standard Visa
-                {"Jane Smith","5500005555555559", "456", "01", "2028"},  // EP: Mastercard format
-                {"Test User", "4111111111111111", "999", "06", "2099"},  // BVA: max year
-        };
+        // Data moved to Excel: sheet name should be 'validPaymentData'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "validPaymentData");
     }
 
     @DataProvider(name = "invalidPaymentData")
     public static Object[][] invalidPaymentData() {
-        return new Object[][]{
-                // name, card, cvc, month, year, description
-                {"",          "4111111111111111", "123", "12", "2027", "empty name"},
-                {"John Doe",  "",                 "123", "12", "2027", "empty card"},
-                {"John Doe",  "4111111111111111", "",    "12", "2027", "empty cvc"},
-                {"John Doe",  "4111111111111111", "123", "",   "2027", "empty month"},
-                {"John Doe",  "4111111111111111", "123", "12", "",     "empty year"},
-        };
+        // Data moved to Excel: sheet name should be 'invalidPaymentData'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "invalidPaymentData");
     }
 
     private void setupLoggedInUserWithProductInCart(String name, String password) {
-        String email = userApi.setupUser(name, password);
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(email, password);
-        signupLoginPage.clickLoginButton();
-        homePage.verifyLoggedInAs(name);
-        homePage.clickProducts();
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
-        cartPage.proceedToCheckout();
-        checkoutPage.enterComment("Payment test");
-        checkoutPage.clickPlaceOrder();
+        String email = userApi.get().setupUser(name, password);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(email, password);
+        signupLoginPage.get().clickLoginButton();
+        homePage.get().verifyLoggedInAs(name);
+        homePage.get().clickProducts();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
+        cartPage.get().proceedToCheckout();
+        checkoutPage.get().enterComment("Payment test");
+        checkoutPage.get().clickPlaceOrder();
     }
 
     @Test(
@@ -72,17 +63,17 @@ public class TC40_PaymentFieldValidation extends BaseTest {
                                      String month, String year) {
         String password = "Password123";
         String userName = "PayUser_" + System.currentTimeMillis();
-        String email = userApi.setupUser(userName, password);
+        String email = userApi.get().setupUser(userName, password);
 
         try {
             setupLoggedInUserWithProductInCart(userName, password);
 
-            checkoutPage.enterPaymentDetails(name.isEmpty() ? userName : name,
+            checkoutPage.get().enterPaymentDetails(name.isEmpty() ? userName : name,
                     card, cvc, month, year);
-            checkoutPage.clickPayAndConfirm();
-            checkoutPage.verifyOrderSuccess();
+            checkoutPage.get().clickPayAndConfirm();
+            checkoutPage.get().verifyOrderSuccess();
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 
@@ -98,19 +89,19 @@ public class TC40_PaymentFieldValidation extends BaseTest {
                                         String month, String year, String description) {
         String password = "Password123";
         String userName = "PayNeg_" + System.currentTimeMillis();
-        String email = userApi.setupUser(userName, password);
+        String email = userApi.get().setupUser(userName, password);
 
         try {
             setupLoggedInUserWithProductInCart(userName, password);
 
-            checkoutPage.enterPaymentDetails(name, card, cvc, month, year);
-            checkoutPage.clickPayAndConfirm();
+            checkoutPage.get().enterPaymentDetails(name, card, cvc, month, year);
+            checkoutPage.get().clickPayAndConfirm();
 
             // Should NOT show order success — should stay on payment page or show error
-            assertThat(page).hasURL(
+            assertThat(getPage()).hasURL(
                     java.util.regex.Pattern.compile(".*(payment|checkout).*"));
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 
@@ -124,20 +115,20 @@ public class TC40_PaymentFieldValidation extends BaseTest {
     public void testCardNumberWithLetters() {
         String password = "Password123";
         String userName = "PayLetter_" + System.currentTimeMillis();
-        String email = userApi.setupUser(userName, password);
+        String email = userApi.get().setupUser(userName, password);
 
         try {
             setupLoggedInUserWithProductInCart(userName, password);
 
-            checkoutPage.enterPaymentDetails("John Doe", "ABCDEFGHIJKLMNOP",
+            checkoutPage.get().enterPaymentDetails("John Doe", "ABCDEFGHIJKLMNOP",
                     "123", "12", "2027");
-            checkoutPage.clickPayAndConfirm();
+            checkoutPage.get().clickPayAndConfirm();
 
             // Should not show success
-            assertThat(page).hasURL(
+            assertThat(getPage()).hasURL(
                     java.util.regex.Pattern.compile(".*(payment|checkout).*"));
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 }

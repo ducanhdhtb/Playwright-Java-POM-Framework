@@ -22,6 +22,7 @@ import pages.SignupLoginPage;
 import pages.CheckoutPage;
 import utils.ConfigReader;
 import utils.CookieManager;
+import utils.PageFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,28 +43,29 @@ public class BaseTest {
             "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
     );
 
-    protected Playwright playwright;
-    protected Browser browser;
-    protected BrowserContext context;
-    protected Page page;
+    protected ThreadLocal<Playwright> playwright = new ThreadLocal<>();
+    protected ThreadLocal<Browser> browser = new ThreadLocal<>();
+    protected ThreadLocal<BrowserContext> context = new ThreadLocal<>();
+    protected ThreadLocal<Page> page = new ThreadLocal<>();
 
     // API layer — available to all tests for setup/teardown without UI
-    protected ApiClient apiClient;
-    protected UserApiHelper userApi;
+    protected ThreadLocal<ApiClient> apiClient = new ThreadLocal<>();
+    protected ThreadLocal<UserApiHelper> userApi = new ThreadLocal<>();
 
-    protected HomePage homePage;
-    protected SignupLoginPage signupLoginPage;
-    protected AccountInformationPage accountPage;
-    protected ProductsPage productsPage;
-    protected CartPage cartPage;
-    protected PaymentPage paymentPage;
-    protected ContactUsPage contactPage;
-    protected ProductDetailPage productDetailPage;
-    protected SignupLoginPage signupPage;
-    protected CheckoutPage checkoutPage;
+    protected ThreadLocal<HomePage> homePage = new ThreadLocal<>();
+    protected ThreadLocal<SignupLoginPage> signupLoginPage = new ThreadLocal<>();
+    protected ThreadLocal<AccountInformationPage> accountPage = new ThreadLocal<>();
+    protected ThreadLocal<ProductsPage> productsPage = new ThreadLocal<>();
+    protected ThreadLocal<CartPage> cartPage = new ThreadLocal<>();
+    protected ThreadLocal<PaymentPage> paymentPage = new ThreadLocal<>();
+    protected ThreadLocal<ContactUsPage> contactPage = new ThreadLocal<>();
+    protected ThreadLocal<ProductDetailPage> productDetailPage = new ThreadLocal<>();
+    protected ThreadLocal<SignupLoginPage> signupPage = new ThreadLocal<>();
+    protected ThreadLocal<CheckoutPage> checkoutPage = new ThreadLocal<>();
+    protected ThreadLocal<PageFactory> pageFactory = new ThreadLocal<>();
 
     public Page getPage() {
-        return page;
+        return page.get();
     }
 
     private boolean headless() {
@@ -217,8 +219,8 @@ public class BaseTest {
     @BeforeClass(alwaysRun = true)
     public void setupBrowser() {
         String browserPath = configuredBrowserPath();
-        playwright = Playwright.create(new Playwright.CreateOptions()
-                .setEnv(playwrightEnv(browserPath)));
+        playwright.set(Playwright.create(new Playwright.CreateOptions()
+                .setEnv(playwrightEnv(browserPath))));
         BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
                 .setHeadless(headless())
                 .setSlowMo(slowMo());
@@ -233,22 +235,22 @@ public class BaseTest {
         }
 
         BrowserType browserType = switch (browserName()) {
-            case "firefox" -> playwright.firefox();
-            case "webkit" -> playwright.webkit();
-            default -> playwright.chromium();
+            case "firefox" -> playwright.get().firefox();
+            case "webkit" -> playwright.get().webkit();
+            default -> playwright.get().chromium();
         };
-        browser = browserType.launch(launchOptions);
+        browser.set(browserType.launch(launchOptions));
 
         // API client is created once per class alongside the browser
-        apiClient = new ApiClient(playwright);
-        userApi = new UserApiHelper(apiClient);
+        apiClient.set(new ApiClient(playwright.get()));
+        userApi.set(new UserApiHelper(apiClient.get()));
     }
 
     @BeforeMethod(alwaysRun = true)
     public void initContext() {
         // When running with TestNG groups filtering, configuration methods can be skipped unless alwaysRun=true.
         // This guard keeps tests from NPE-ing in case setupBrowser wasn't invoked for any reason.
-        if (browser == null) {
+        if (browser.get() == null) {
             setupBrowser();
         }
 
@@ -281,40 +283,42 @@ public class BaseTest {
             }
         }
 
-        context = browser.newContext(contextOptions);
+        context.set(browser.get().newContext(contextOptions));
 
         TracingMode tracingMode = tracingMode();
         if (tracingMode != TracingMode.OFF) {
-            context.tracing().start(new Tracing.StartOptions()
+            context.get().tracing().start(new Tracing.StartOptions()
                     .setScreenshots(tracingScreenshots())
                     .setSnapshots(tracingSnapshots())
                     .setSources(tracingSources()));
         }
 
-        page = context.newPage();
-        page.setDefaultTimeout(defaultTimeoutMs());
-        page.setDefaultNavigationTimeout(navigationTimeoutMs());
+        page.set(context.get().newPage());
+        page.get().setDefaultTimeout(defaultTimeoutMs());
+        page.get().setDefaultNavigationTimeout(navigationTimeoutMs());
         PlaywrightAssertions.setDefaultAssertionTimeout(assertionTimeoutMs());
-        page.onDialog(dialog -> dialog.accept());
+        page.get().onDialog(dialog -> dialog.accept());
 
-        homePage = new HomePage(page);
-        signupLoginPage = new SignupLoginPage(page);
-        accountPage = new AccountInformationPage(page);
-        productsPage = new ProductsPage(page);
-        cartPage = new CartPage(page);
-        paymentPage = new PaymentPage(page);
-        contactPage = new ContactUsPage(page);
-        productDetailPage = new ProductDetailPage(page);
-        signupPage = new SignupLoginPage(page);
-        checkoutPage = new CheckoutPage(page);
+        pageFactory.set(new PageFactory(page.get()));
+
+        homePage.set(pageFactory.get().getHomePage());
+        signupLoginPage.set(pageFactory.get().getSignupLoginPage());
+        accountPage.set(pageFactory.get().getAccountInformationPage());
+        productsPage.set(pageFactory.get().getProductsPage());
+        cartPage.set(pageFactory.get().getCartPage());
+        paymentPage.set(pageFactory.get().getPaymentPage());
+        contactPage.set(pageFactory.get().getContactUsPage());
+        productDetailPage.set(pageFactory.get().getProductDetailPage());
+        signupPage.set(pageFactory.get().getSignupLoginPage());
+        checkoutPage.set(pageFactory.get().getCheckoutPage());
     }
 
     @Step("Create a fresh logged-in user for test setup")
     protected String createLoggedInUser(String name, String password) {
-        homePage.clickSignupLogin();
-        String email = signupLoginPage.fillSignupDetailsWithRandomEmail(name);
-        accountPage.fillAccountDetails(password, "10", "July", "2000");
-        accountPage.fillAddressDetails(
+        homePage.get().clickSignupLogin();
+        String email = signupLoginPage.get().fillSignupDetailsWithRandomEmail(name);
+        accountPage.get().fillAccountDetails(password, "10", "July", "2000");
+        accountPage.get().fillAddressDetails(
                 "Test",
                 "User",
                 "Test Corp",
@@ -324,8 +328,8 @@ public class BaseTest {
                 "Austin",
                 "73301",
                 "1234567890");
-        accountPage.clickCreateAccount();
-        page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
+        accountPage.get().clickCreateAccount();
+        page.get().getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Continue")).click();
         return email;
     }
 
@@ -337,7 +341,7 @@ public class BaseTest {
      */
     @Step("Saving session as '{0}'")
     protected void saveSession(String sessionName) {
-        CookieManager.save(context, sessionName);
+        CookieManager.save(context.get(), sessionName);
     }
 
     /**
@@ -346,7 +350,7 @@ public class BaseTest {
      */
     @Step("Restoring session '{0}'")
     protected void restoreSession(String sessionName) {
-        CookieManager.restore(context, sessionName);
+        CookieManager.restore(context.get(), sessionName);
     }
 
     /**
@@ -355,19 +359,19 @@ public class BaseTest {
      */
     @Step("Login and save session as '{1}'")
     protected String loginAndSaveSession(String name, String password, String sessionName) {
-        String email = userApi.setupUser(name, password);
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(email, password);
-        signupLoginPage.clickLoginButton();
-        homePage.verifyLoggedInAs(name);
+        String email = userApi.get().setupUser(name, password);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(email, password);
+        signupLoginPage.get().clickLoginButton();
+        homePage.get().verifyLoggedInAs(name);
         saveSession(sessionName);
         return email;
     }
 
     @AfterMethod(alwaysRun = true)
     public void stopTracingAndClose(ITestResult result) {
-        if (context == null) {
+        if (context.get() == null) {
             return;
         }
 
@@ -381,15 +385,15 @@ public class BaseTest {
 
         Video video = null;
         try {
-            if (page != null) {
-                video = page.video();
+            if (page.get() != null) {
+                video = page.get().video();
             }
         } catch (Exception ignored) {
         }
 
         // Persist a failure snapshot for Jenkins/email debugging.
         // Allure already gets attachments via listener/aspect, but Jenkins needs files to link as artifacts.
-        if (!passed && page != null) {
+        if (!passed && page.get() != null) {
             try {
                 Path dir = Paths.get("target", "artifacts", "failures");
                 Files.createDirectories(dir);
@@ -400,14 +404,14 @@ public class BaseTest {
                 Path htmlPath = dir.resolve(base + "_" + ts + ".html");
                 Path metaPath = dir.resolve(base + "_" + ts + ".txt");
 
-                if (!page.isClosed()) {
-                    page.screenshot(new Page.ScreenshotOptions()
+                if (!page.get().isClosed()) {
+                    page.get().screenshot(new Page.ScreenshotOptions()
                             .setFullPage(true)
                             .setPath(screenshotPath));
                 }
 
                 try {
-                    String html = page.content();
+                    String html = page.get().content();
                     Files.writeString(htmlPath, html, StandardCharsets.UTF_8);
                 } catch (Exception ignored) {
                 }
@@ -415,8 +419,8 @@ public class BaseTest {
                 try {
                     String meta = "class=" + className + "\n"
                             + "test=" + testName + "\n"
-                            + "url=" + (page.isClosed() ? "" : page.url()) + "\n"
-                            + "title=" + (page.isClosed() ? "" : page.title()) + "\n";
+                            + "url=" + (page.get().isClosed() ? "" : page.get().url()) + "\n"
+                            + "title=" + (page.get().isClosed() ? "" : page.get().title()) + "\n";
                     Files.writeString(metaPath, meta, StandardCharsets.UTF_8);
                 } catch (Exception ignored) {
                 }
@@ -433,16 +437,16 @@ public class BaseTest {
 
             if (tracingMode == TracingMode.ON || (tracingMode == TracingMode.RETAIN_ON_FAILURE && !passed)) {
                 Path tracePath = tracingDir().resolve(testName + "_" + System.currentTimeMillis() + ".zip");
-                context.tracing().stop(new Tracing.StopOptions().setPath(tracePath));
+                context.get().tracing().stop(new Tracing.StopOptions().setPath(tracePath));
             } else {
-                context.tracing().stop();
+                context.get().tracing().stop();
             }
         }
 
         // Video is recorded by context options; only decide whether to keep it.
         VideoMode videoMode = videoMode();
 
-        context.close();
+        context.get().close();
 
         if (videoMode == VideoMode.RETAIN_ON_FAILURE && passed && video != null) {
             try {
@@ -454,14 +458,14 @@ public class BaseTest {
 
     @AfterClass(alwaysRun = true)
     public void tearDown() {
-        if (browser != null) {
-            browser.close();
+        if (browser.get() != null) {
+            browser.get().close();
         }
-        if (apiClient != null) {
-            apiClient.dispose();
+        if (apiClient.get() != null) {
+            apiClient.get().dispose();
         }
-        if (playwright != null) {
-            playwright.close();
+        if (playwright.get() != null) {
+            playwright.get().close();
         }
     }
 }

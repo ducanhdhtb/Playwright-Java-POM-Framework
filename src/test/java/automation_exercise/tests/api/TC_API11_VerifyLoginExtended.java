@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import java.util.Map;
 
 import static org.testng.Assert.*;
+import utils.ExcelReader;
 
 /**
  * TC_API11: Verify Login — Extended EP + BVA + Error Guessing
@@ -148,12 +149,7 @@ public class TC_API11_VerifyLoginExtended extends BaseApiTest {
 
     @DataProvider(name = "invalidEmailFormats")
     public Object[][] invalidEmailFormats() {
-        return new Object[][]{
-                {"notanemail"},
-                {"missing@"},
-                {"@nodomain"},
-                {"double@@domain.com"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "invalidEmailFormats");
     }
 
     @Test(description = "API11-EP9: Invalid email format returns 400 or 404",

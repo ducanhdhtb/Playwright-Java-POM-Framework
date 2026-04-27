@@ -30,24 +30,24 @@ public class TC20_LoginWithApiCreatedUser extends BaseTest {
         String password = UserApiHelper.defaultPassword();
 
         // 1. Create user via API — no UI signup flow needed
-        String email = userApi.setupUser(name, password);
+        String email = userApi.get().setupUser(name, password);
 
         try {
             // 2. Navigate and login via UI
-            homePage.navigate(ConfigReader.getProperty("baseUrl"));
-            homePage.clickSignupLogin();
-            signupLoginPage.fillLoginForm(email, password);
-            signupLoginPage.clickLoginButton();
+            homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+            homePage.get().clickSignupLogin();
+            signupLoginPage.get().fillLoginForm(email, password);
+            signupLoginPage.get().clickLoginButton();
 
             // 3. Verify logged in
-            homePage.verifyLoggedInAs(name);
+            homePage.get().verifyLoggedInAs(name);
 
             // 4. Verify header shows correct username
-            assertThat(page.locator("#header")).containsText("Logged in as " + name);
+            assertThat(getPage().locator("#header")).containsText("Logged in as " + name);
 
         } finally {
             // 5. Teardown via API — no UI delete flow needed
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 }

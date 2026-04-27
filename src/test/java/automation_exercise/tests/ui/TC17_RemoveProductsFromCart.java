@@ -13,22 +13,22 @@ public class TC17_RemoveProductsFromCart extends BaseTest {
     @Step("TC17: Remove products from cart")
     public void removeProductsFromCart() {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Add products to cart
-        homePage.clickProducts();
-        productsPage.addProductToCartByIndex(0);
-        productsPage.clickContinueShopping();
+        homePage.get().clickProducts();
+        productsPage.get().addProductToCartByIndex(0);
+        productsPage.get().clickContinueShopping();
 
         // 5-6. Click 'Cart' button and Verify cart page
-        homePage.clickCart();
-        assertThat(page).hasURL("https://automationexercise.com/view_cart");
+        homePage.get().clickCart();
+        assertThat(getPage()).hasURL("https://automationexercise.com/view_cart");
 
         // 7. Click 'X' button corresponding to particular product
-        cartPage.removeProductByIndex(0);
+        cartPage.get().removeProductByIndex(0);
 
         // 8. Verify that product is removed from the cart
-        cartPage.verifyProductIsRemoved();
+        cartPage.get().verifyProductIsRemoved();
     }
 }

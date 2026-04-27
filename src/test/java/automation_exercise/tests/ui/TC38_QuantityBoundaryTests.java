@@ -6,6 +6,7 @@ import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.ExcelReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.testng.Assert.assertEquals;
@@ -26,22 +27,14 @@ public class TC38_QuantityBoundaryTests extends BaseTest {
 
     @DataProvider(name = "validQuantities")
     public static Object[][] validQuantities() {
-        return new Object[][]{
-                {"1",   "1"},    // BVA: min boundary
-                {"2",   "2"},    // EP: valid partition
-                {"10",  "10"},   // EP: typical value
-                {"99",  "99"},   // BVA: large valid
-                {"100", "100"},  // BVA: upper boundary test
-        };
+        // Data moved to Excel: sheet name should be 'validQuantities'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "validQuantities");
     }
 
     @DataProvider(name = "invalidQuantities")
     public static Object[][] invalidQuantities() {
-        return new Object[][]{
-                {"0"},    // BVA: below min
-                {"-1"},   // EP: negative partition
-                {"-999"}, // EP: large negative
-        };
+        // Data moved to Excel: sheet name should be 'invalidQuantities'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "invalidQuantities");
     }
 
     @Test(
@@ -53,16 +46,16 @@ public class TC38_QuantityBoundaryTests extends BaseTest {
     @Description("BVA: Valid quantity values (1, 2, 10, 99, 100) should be accepted and shown in cart")
     @Step("TC38a: Add product with quantity '{0}' — expect cart quantity '{1}'")
     public void testValidQuantityAddedToCart(String inputQty, String expectedQty) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
-        productDetailPage.verifyProductDetailsVisible();
-        productDetailPage.setQuantity(inputQty);
-        productDetailPage.addToCart();
-        productsPage.clickViewCart();
+        productDetailPage.get().verifyProductDetailsVisible();
+        productDetailPage.get().setQuantity(inputQty);
+        productDetailPage.get().addToCart();
+        productsPage.get().clickViewCart();
 
-        assertThat(page.locator(".cart_quantity button")).hasText(expectedQty);
+        assertThat(getPage().locator(".cart_quantity button")).hasText(expectedQty);
     }
 
     @Test(
@@ -74,30 +67,30 @@ public class TC38_QuantityBoundaryTests extends BaseTest {
     @Description("BVA: Quantity 0 or negative should be blocked by HTML5 min=1 validation")
     @Step("TC38b: Quantity '{0}' should be blocked or corrected to min=1")
     public void testInvalidQuantityBlocked(String inputQty) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
-        productDetailPage.verifyProductDetailsVisible();
+        productDetailPage.get().verifyProductDetailsVisible();
 
         // Set invalid quantity
-        page.locator("#quantity").fill(inputQty);
+        getPage().locator("#quantity").fill(inputQty);
 
         // Try to add to cart
-        page.locator("button.cart").click();
+        getPage().locator("button.cart").click();
 
         // Either: stays on product page (validation blocked) OR
         // browser corrects to min=1 and adds to cart
         // We verify the page doesn't crash and quantity in cart is >= 1
-        String currentUrl = page.url();
+        String currentUrl = getPage().url();
         if (currentUrl.contains("view_cart")) {
             // Browser corrected to min=1
-            String cartQty = page.locator(".cart_quantity button").innerText().trim();
+            String cartQty = getPage().locator(".cart_quantity button").innerText().trim();
             int qty = Integer.parseInt(cartQty);
             assert qty >= 1 : "Cart quantity should be at least 1, got: " + qty;
         } else {
             // Stayed on product page — validation blocked
-            assertThat(page).hasURL(
+            assertThat(getPage()).hasURL(
                     java.util.regex.Pattern.compile(".*/product_details/.*"));
         }
     }
@@ -110,21 +103,21 @@ public class TC38_QuantityBoundaryTests extends BaseTest {
     @Description("EP: Decimal quantity '1.5' should be truncated to 1 or blocked")
     @Step("TC38c: Decimal quantity '1.5' behavior")
     public void testDecimalQuantityBehavior() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
-        productDetailPage.verifyProductDetailsVisible();
-        page.locator("#quantity").fill("1.5");
-        page.locator("button.cart").click();
+        productDetailPage.get().verifyProductDetailsVisible();
+        getPage().locator("#quantity").fill("1.5");
+        getPage().locator("button.cart").click();
 
         // Navigate to cart if modal appeared
         try {
-            productsPage.clickViewCart();
+            productsPage.get().clickViewCart();
         } catch (Exception ignored) {}
 
-        if (page.url().contains("view_cart")) {
-            String cartQty = page.locator(".cart_quantity button").innerText().trim();
+        if (getPage().url().contains("view_cart")) {
+            String cartQty = getPage().locator(".cart_quantity button").innerText().trim();
             // Should be 1 (truncated) not 1.5
             assertEquals(cartQty, "1", "Decimal quantity should be truncated to 1");
         }

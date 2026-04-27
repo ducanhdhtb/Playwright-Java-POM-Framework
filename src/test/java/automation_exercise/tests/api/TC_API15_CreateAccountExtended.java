@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.testng.Assert.*;
+import utils.ExcelReader;
 
 /**
  * TC_API15: Create Account — Extended EP + BVA + Error Guessing
@@ -94,7 +95,7 @@ public class TC_API15_CreateAccountExtended extends BaseApiTest {
 
     @DataProvider(name = "validTitles")
     public Object[][] validTitles() {
-        return new Object[][]{{"Mr"}, {"Mrs"}, {"Miss"}};
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "validTitles");
     }
 
     @Test(description = "API15-EP7: Valid title values (Mr/Mrs/Miss) create account",
@@ -114,13 +115,19 @@ public class TC_API15_CreateAccountExtended extends BaseApiTest {
 
     @DataProvider(name = "birthDates")
     public Object[][] birthDates() {
-        return new Object[][]{
-                {"1",  "July", "1990", true},   // BVA: min day
-                {"31", "July", "1990", true},   // BVA: max day for July (31 days)
-                {"28", "February", "2000", true}, // BVA: valid Feb day
-                {"0",  "July", "1990", false},  // BVA: below min
-                {"32", "July", "1990", false},  // BVA: above max
-        };
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "birthDates");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String day = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            String month = rows[i].length > 1 && rows[i][1] != null ? rows[i][1].toString() : "";
+            String year = rows[i].length > 2 && rows[i][2] != null ? rows[i][2].toString() : "";
+            boolean expect = false;
+            if (rows[i].length > 3 && rows[i][3] != null) {
+                expect = Boolean.parseBoolean(rows[i][3].toString());
+            }
+            out[i] = new Object[]{day, month, year, expect};
+        }
+        return out;
     }
 
     @Test(description = "API15-EP9: Birth date boundary values",
@@ -149,14 +156,15 @@ public class TC_API15_CreateAccountExtended extends BaseApiTest {
 
     @DataProvider(name = "birthMonths")
     public Object[][] birthMonths() {
-        return new Object[][]{
-                {"January",   true},
-                {"December",  true},
-                {"July",      true},
-                {"InvalidMonth", false},
-                {"13",        false},
-                {"0",         false},
-        };
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "birthMonths");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String month = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            boolean expect = false;
+            if (rows[i].length > 1 && rows[i][1] != null) expect = Boolean.parseBoolean(rows[i][1].toString());
+            out[i] = new Object[]{month, expect};
+        }
+        return out;
     }
 
     @Test(description = "API15-EP10: Birth month boundary values",
@@ -182,16 +190,15 @@ public class TC_API15_CreateAccountExtended extends BaseApiTest {
 
     @DataProvider(name = "birthYears")
     public Object[][] birthYears() {
-        return new Object[][]{
-                {"1900", true},   // BVA: very old
-                {"2000", true},   // EP: typical
-                {"2010", true},   // EP: recent
-                {"2026", true},   // BVA: current year
-                {"2027", false},  // BVA: future year
-                {"9999", false},  // BVA: far future
-                {"0",    false},  // BVA: zero year
-                {"-1",   false},  // BVA: negative year
-        };
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "birthYears");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String year = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            boolean expect = false;
+            if (rows[i].length > 1 && rows[i][1] != null) expect = Boolean.parseBoolean(rows[i][1].toString());
+            out[i] = new Object[]{year, expect};
+        }
+        return out;
     }
 
     @Test(description = "API15-EP11: Birth year boundary values",
@@ -233,12 +240,7 @@ public class TC_API15_CreateAccountExtended extends BaseApiTest {
 
     @DataProvider(name = "specialAddresses")
     public Object[][] specialAddresses() {
-        return new Object[][]{
-                {"123 O'Brien St",          "apostrophe"},
-                {"Apt #5, 123 Main St",     "hash and comma"},
-                {"123 Müller Straße",       "German umlauts"},
-                {"<script>alert(1)</script>","XSS in address"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "specialAddresses");
     }
 
     @Test(description = "API15-EP13: Special characters in address handled safely",

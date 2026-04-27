@@ -29,24 +29,24 @@ public class TC24_AccountManagement extends BaseTest {
     public void testLogoutRedirectsToLoginPage() {
         String name = "LogoutUser";
         String password = "Password123";
-        String email = userApi.setupUser(name, password);
+        String email = userApi.get().setupUser(name, password);
 
         try {
-            homePage.navigate(ConfigReader.getProperty("baseUrl"));
-            homePage.clickSignupLogin();
-            signupLoginPage.fillLoginForm(email, password);
-            signupLoginPage.clickLoginButton();
+            homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+            homePage.get().clickSignupLogin();
+            signupLoginPage.get().fillLoginForm(email, password);
+            signupLoginPage.get().clickLoginButton();
 
-            homePage.verifyLoggedInAs(name);
+            homePage.get().verifyLoggedInAs(name);
 
             // Logout
-            homePage.clickLogout();
+            homePage.get().clickLogout();
 
             // Verify redirected to login page
-            assertThat(page).hasTitle("Automation Exercise - Signup / Login");
-            assertThat(page.locator("#header")).not().containsText("Logged in as");
+            assertThat(getPage()).hasTitle("Automation Exercise - Signup / Login");
+            assertThat(getPage().locator("#header")).not().containsText("Logged in as");
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 
@@ -59,20 +59,20 @@ public class TC24_AccountManagement extends BaseTest {
     public void testDeletedAccountCannotLogin() {
         String name = "DeletedUser";
         String password = "Password123";
-        String email = userApi.setupUser(name, password);
+        String email = userApi.get().setupUser(name, password);
 
         // Delete via API immediately
-        ApiResponse deleteResp = userApi.deleteUser(email, password);
+        ApiResponse deleteResp = userApi.get().deleteUser(email, password);
         assertEquals(deleteResp.responseCode(), 200, "API delete should succeed");
 
         // Attempt UI login with deleted account
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(email, password);
-        signupLoginPage.clickLoginButton();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(email, password);
+        signupLoginPage.get().clickLoginButton();
 
         // Should show error — account no longer exists
-        assertThat(page.getByText("Your email or password is incorrect!"))
+        assertThat(getPage().getByText("Your email or password is incorrect!"))
                 .isVisible();
     }
 
@@ -87,18 +87,18 @@ public class TC24_AccountManagement extends BaseTest {
         String password = "Password123";
         String email = "api_detail_check_" + System.currentTimeMillis() + "@testmail.com";
 
-        ApiResponse create = userApi.createUser(name, email, password);
+        ApiResponse create = userApi.get().createUser(name, email, password);
         assertEquals(create.responseCode(), 201, "User creation should succeed");
 
         try {
-            ApiResponse details = userApi.getUserByEmail(email);
+            ApiResponse details = userApi.get().getUserByEmail(email);
             assertEquals(details.responseCode(), 200, "Should fetch user details");
 
             var user = details.json().path("user");
             assertEquals(user.path("email").asText(), email, "Email should match");
             assertEquals(user.path("name").asText(), name, "Name should match");
         } finally {
-            userApi.teardownUser(email, password);
+            userApi.get().teardownUser(email, password);
         }
     }
 }

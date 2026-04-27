@@ -26,22 +26,22 @@ public class TC35_ReviewFormValidation extends BaseTest {
     @Step("TC35a: Empty review form submission blocked by validation")
     public void testSubmitEmptyReviewForm() {
         // Navigate to product detail page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
         // Verify review form is visible
-        assertThat(page.locator("#review-form")).isVisible();
+        assertThat(getPage().locator("#review-form")).isVisible();
 
         // Attempt submit with empty fields (all fields are required)
-        page.locator("#button-review").click();
+        getPage().locator("#button-review").click();
 
         // Should remain on product detail page (HTML5 validation blocks submit)
-        assertThat(page).hasURL(
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*/product_details/.*"));
 
         // Review success message should NOT be visible
-        assertThat(page.locator("#review-section")).not().isVisible();
+        assertThat(getPage().locator("#review-section")).not().isVisible();
     }
 
     @Test(
@@ -53,24 +53,24 @@ public class TC35_ReviewFormValidation extends BaseTest {
     @Step("TC35b: Invalid email in review form blocked by validation")
     public void testSubmitReviewWithInvalidEmail() {
         // Navigate to product detail page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
         // Fill name and review but use invalid email
-        page.locator("#name").fill("TestUser");
-        page.locator("#email").fill("not-a-valid-email");
-        page.locator("#review").fill("This is a test review");
+        getPage().locator("#name").fill("TestUser");
+        getPage().locator("#email").fill("not-a-valid-email");
+        getPage().locator("#review").fill("This is a test review");
 
         // Attempt submit
-        page.locator("#button-review").click();
+        getPage().locator("#button-review").click();
 
         // Should remain on product detail page
-        assertThat(page).hasURL(
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*/product_details/.*"));
 
         // Success message should NOT be visible
-        assertThat(page.locator("#review-section")).not().isVisible();
+        assertThat(getPage().locator("#review-section")).not().isVisible();
     }
 
     @Test(
@@ -82,21 +82,21 @@ public class TC35_ReviewFormValidation extends BaseTest {
     @Step("TC35c: Valid review submission shows success")
     public void testSubmitValidReview() {
         // Navigate to product detail page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.clickViewProductOfFirstItem();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().clickViewProductOfFirstItem();
 
         // Fill all required fields with valid data
-        productDetailPage.writeReview(
+        productDetailPage.get().writeReview(
                 "ValidReviewer",
                 "valid_" + System.currentTimeMillis() + "@test.com",
                 "Excellent product! Very good quality and fast delivery."
         );
 
         // Submit
-        productDetailPage.submitReview();
+        productDetailPage.get().submitReview();
 
         // Verify success message
-        productDetailPage.verifyReviewSuccess();
+        productDetailPage.get().verifyReviewSuccess();
     }
 }

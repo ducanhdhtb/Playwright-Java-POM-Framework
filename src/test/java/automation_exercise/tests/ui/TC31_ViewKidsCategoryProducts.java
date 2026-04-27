@@ -25,20 +25,20 @@ public class TC31_ViewKidsCategoryProducts extends BaseTest {
     @Step("TC31: View Kids category products")
     public void testViewKidsCategoryProducts() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.verifyCategoriesVisible();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().verifyCategoriesVisible();
 
         // 4. Click Kids > Dress
-        homePage.selectCategory("a[href='#Kids']", "Dress");
-        homePage.verifyCategoryPageTitle("KIDS - DRESS PRODUCTS");
-        assertThat(page.locator(".features_items")).isVisible();
-        assertThat(page.locator(".single-products").first()).isVisible();
+        homePage.get().selectCategory("a[href='#Kids']", "Dress");
+        homePage.get().verifyCategoryPageTitle("KIDS - DRESS PRODUCTS");
+        assertThat(getPage().locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".single-products").first()).isVisible();
 
         // 5. Navigate back and click Kids > Tops & Shirts
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.selectCategory("a[href='#Kids']", "Tops & Shirts");
-        homePage.verifyCategoryPageTitle("KIDS - TOPS & SHIRTS PRODUCTS");
-        assertThat(page.locator(".features_items")).isVisible();
-        assertThat(page.locator(".single-products").first()).isVisible();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().selectCategory("a[href='#Kids']", "Tops & Shirts");
+        homePage.get().verifyCategoryPageTitle("KIDS - TOPS & SHIRTS PRODUCTS");
+        assertThat(getPage().locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".single-products").first()).isVisible();
     }
 }

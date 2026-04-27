@@ -28,57 +28,57 @@ public class TC15_PlaceOrderRegisterBeforeCheckout extends BaseTest {
             String cardName, String cardNumber, String cvc, String expMonth, String expYear
     ) {
         // 1-3. Launch and Verify Home Page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click 'Signup / Login' button
-        homePage.clickSignupLogin();
+        homePage.get().clickSignupLogin();
 
         // 5. Fill all details in Signup and create account
         String email = (emailPrefix == null ? "user_pro_" : emailPrefix) + System.currentTimeMillis() + "@test.com";
 
-        signupLoginPage.fillSignupDetails(username, email);
-        signupLoginPage.fillAccountInformation(password, day, month, year);
-        signupLoginPage.fillAddressDetails(firstName, lastName, address, state, city, zipcode, mobile);
-        signupLoginPage.clickCreateAccount();
+        signupLoginPage.get().fillSignupDetails(username, email);
+        signupLoginPage.get().fillAccountInformation(password, day, month, year);
+        signupLoginPage.get().fillAddressDetails(firstName, lastName, address, state, city, zipcode, mobile);
+        signupLoginPage.get().clickCreateAccount();
 
         // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
-        assertThat(page.locator("h2:has-text('Account Created!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        assertThat(getPage().locator("h2:has-text('Account Created!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
 
         // 7. Verify 'Logged in as username' at top
-        homePage.verifyLoggedInAs(username);
+        homePage.get().verifyLoggedInAs(username);
 
         // 8. Add products to cart
         // Giả sử ta thêm sản phẩm đầu tiên bằng logic hover đã xây dựng
-        homePage.clickProducts();
-        productsPage.addProductToCartByIndex(Integer.parseInt(productIndex));
-        productsPage.clickContinueShopping();
+        homePage.get().clickProducts();
+        productsPage.get().addProductToCartByIndex(Integer.parseInt(productIndex));
+        productsPage.get().clickContinueShopping();
 
         // 9-10. Click 'Cart' button and Verify cart page
-        homePage.clickCart();
-        assertThat(page).hasURL("https://automationexercise.com/view_cart");
+        homePage.get().clickCart();
+        assertThat(getPage()).hasURL("https://automationexercise.com/view_cart");
 
         // 11. Click Proceed To Checkout
-        cartPage.clickProceedToCheckout();
+        cartPage.get().clickProceedToCheckout();
 
         // 12. Verify Address Details and Review Your Order
         // (Thực hiện verify nội dung địa chỉ nếu cần thiết)
 
         // 13. Enter description in comment and click 'Place Order'
-        checkoutPage.enterComment(comment);
-        checkoutPage.clickPlaceOrder();
+        checkoutPage.get().enterComment(comment);
+        checkoutPage.get().clickPlaceOrder();
 
         // 14-15. Enter payment details and Confirm
-        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
-        checkoutPage.clickPayAndConfirm();
+        checkoutPage.get().enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
+        checkoutPage.get().clickPayAndConfirm();
 
         // 16. Verify success message 'Your order has been placed successfully!'
-        checkoutPage.verifyOrderSuccess();
+        checkoutPage.get().verifyOrderSuccess();
 
         // 17-20. Delete Account and Verify
-        homePage.deleteAccount();
-        assertThat(page.locator("h2:has-text('Account Deleted!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        homePage.get().deleteAccount();
+        assertThat(getPage().locator("h2:has-text('Account Deleted!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
     }
 }

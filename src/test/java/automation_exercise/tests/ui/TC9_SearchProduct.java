@@ -18,15 +18,15 @@ public class TC9_SearchProduct extends BaseTest {
     )
     @Step("TC9: Search for products")
     public void searchProduct(String searchKey) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
-        productsPage.searchProduct(searchKey);
+        productsPage.get().searchProduct(searchKey);
 
         // Verify the title
-        assertThat(page.locator(".title.text-center")).hasText("Searched Products");
+        assertThat(getPage().locator(".title.text-center")).hasText("Searched Products");
 
         // Verify that all results contain the search key
-        productsPage.verifyAllProductNamesContain(searchKey);
+        productsPage.get().verifyAllProductNamesContain(searchKey);
     }
 }

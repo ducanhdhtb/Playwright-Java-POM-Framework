@@ -6,6 +6,7 @@ import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.ExcelReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.testng.Assert.assertTrue;
@@ -28,22 +29,24 @@ public class TC39_SearchBoundaryTests extends BaseTest {
 
     @DataProvider(name = "validSearchKeywords")
     public static Object[][] validSearchKeywords() {
-        return new Object[][]{
-                {"top",   true},   // EP1: common keyword
-                {"dress", true},   // EP1: common keyword
-                {"t",     true},   // BVA: single char — should return results
-                {"blu",   true},   // EP7: partial match
-        };
+        // Read rows from Excel and convert second column to boolean
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "validSearchKeywords");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String keyword = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            boolean expect = false;
+            if (rows[i].length > 1 && rows[i][1] != null) {
+                expect = Boolean.parseBoolean(rows[i][1].toString());
+            }
+            out[i] = new Object[]{keyword, expect};
+        }
+        return out;
     }
 
     @DataProvider(name = "caseVariants")
     public static Object[][] caseVariants() {
-        return new Object[][]{
-                {"TOP"},
-                {"Top"},
-                {"top"},
-                {"tOp"},
-        };
+        // Data moved to Excel: sheet name should be 'caseVariants'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "caseVariants");
     }
 
     @Test(
@@ -55,15 +58,15 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("EP: Valid search keywords return matching products")
     @Step("TC39a: Search '{0}' — expect results: {1}")
     public void testValidSearchKeywords(String keyword, boolean expectResults) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct(keyword);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct(keyword);
 
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
 
         if (expectResults) {
-            assertThat(page.locator(".productinfo").first()).isVisible();
-            int count = page.locator(".single-products").count();
+            assertThat(getPage().locator(".productinfo").first()).isVisible();
+            int count = getPage().locator(".single-products").count();
             assertTrue(count > 0, "Search '" + keyword + "' should return results, got 0");
         }
     }
@@ -77,12 +80,12 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("EP: Search should be case-insensitive")
     @Step("TC39b: Case-insensitive search for '{0}'")
     public void testSearchCaseInsensitive(String keyword) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct(keyword);
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct(keyword);
 
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
-        assertThat(page.locator(".productinfo").first()).isVisible();
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage().locator(".productinfo").first()).isVisible();
     }
 
     @Test(
@@ -93,14 +96,14 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("EP: Whitespace-only search — edge case behavior")
     @Step("TC39c: Whitespace-only search")
     public void testSearchWithWhitespaceOnly() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct("   ");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct("   ");
 
         // Should show Searched Products section (not crash)
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
         // Page should remain functional
-        assertThat(page).hasURL(
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*products.*"));
     }
 
@@ -112,15 +115,15 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("Error Guessing: XSS payload in search should be sanitized, not executed")
     @Step("TC39d: XSS payload in search field")
     public void testSearchXssPayload() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct("<script>alert('xss')</script>");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct("<script>alert('xss')</script>");
 
-        // Page should not show alert dialog (already handled by page.onDialog in BaseTest)
+        // Page should not show alert dialog (already handled by getPage().onDialog in BaseTest)
         // Should show Searched Products section safely
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
         // No products should match XSS payload
-        assertThat(page.locator(".productinfo")).hasCount(0);
+        assertThat(getPage().locator(".productinfo")).hasCount(0);
     }
 
     @Test(
@@ -131,13 +134,13 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("Error Guessing: SQL injection in search should be handled safely")
     @Step("TC39e: SQL injection payload in search")
     public void testSearchSqlInjection() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct("' OR '1'='1");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct("' OR '1'='1");
 
         // Page should not crash or return all products
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
-        assertThat(page).hasURL(
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*products.*"));
     }
 
@@ -149,11 +152,11 @@ public class TC39_SearchBoundaryTests extends BaseTest {
     @Description("Error Guessing: Special characters in search should not crash the page")
     @Step("TC39f: Special characters in search")
     public void testSearchSpecialCharacters() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.searchProduct("@#$%^&*()");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().searchProduct("@#$%^&*()");
 
-        assertThat(page.locator(".title.text-center")).containsText("Searched Products");
-        assertThat(page.locator(".productinfo")).hasCount(0);
+        assertThat(getPage().locator(".title.text-center")).containsText("Searched Products");
+        assertThat(getPage().locator(".productinfo")).hasCount(0);
     }
 }

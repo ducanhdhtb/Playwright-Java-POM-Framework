@@ -26,14 +26,14 @@ public class TC36_VerifyCartEmptyState extends BaseTest {
     @Step("TC36a: Verify empty cart message")
     public void testEmptyCartShowsMessage() {
         // Navigate directly to cart (should be empty for new session)
-        homePage.navigate("https://automationexercise.com/view_cart");
+        homePage.get().navigate("https://automationexercise.com/view_cart");
 
         // Verify empty cart message is visible
-        assertThat(page.locator("#empty_cart")).isVisible();
-        assertThat(page.locator("#empty_cart")).containsText("Cart is empty!");
+        assertThat(getPage().locator("#empty_cart")).isVisible();
+        assertThat(getPage().locator("#empty_cart")).containsText("Cart is empty!");
 
         // Verify link to products page exists
-        assertThat(page.locator("#empty_cart a[href='/products']")).isVisible();
+        assertThat(getPage().locator("#empty_cart a[href='/products']")).isVisible();
     }
 
     @Test(
@@ -45,17 +45,17 @@ public class TC36_VerifyCartEmptyState extends BaseTest {
     @Step("TC36b: Empty cart link navigates to products")
     public void testEmptyCartLinkNavigatesToProducts() {
         // Navigate to empty cart
-        homePage.navigate("https://automationexercise.com/view_cart");
+        homePage.get().navigate("https://automationexercise.com/view_cart");
 
         // Verify empty state
-        assertThat(page.locator("#empty_cart")).isVisible();
+        assertThat(getPage().locator("#empty_cart")).isVisible();
 
         // Click the 'here' link
-        page.locator("#empty_cart a[href='/products']").click();
+        getPage().locator("#empty_cart a[href='/products']").click();
 
         // Verify navigated to products page
-        assertThat(page).hasURL("https://automationexercise.com/products");
-        assertThat(page.getByRole(
+        assertThat(getPage()).hasURL("https://automationexercise.com/products");
+        assertThat(getPage().getByRole(
                 com.microsoft.playwright.options.AriaRole.HEADING,
                 new com.microsoft.playwright.Page.GetByRoleOptions().setName("All Products").setExact(true)
         )).isVisible();
@@ -70,19 +70,19 @@ public class TC36_VerifyCartEmptyState extends BaseTest {
     @Step("TC36c: Cart empty state after removing all products")
     public void testCartEmptyAfterRemovingAllProducts() {
         // Add one product
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // Verify product is in cart
-        cartPage.verifyCartCount(1);
+        cartPage.get().verifyCartCount(1);
 
         // Remove the product
-        cartPage.removeProductByIndex(0);
+        cartPage.get().removeProductByIndex(0);
 
         // Verify empty cart state
-        assertThat(page.locator("#empty_cart")).isVisible();
-        assertThat(page.locator("#empty_cart")).containsText("Cart is empty!");
+        assertThat(getPage().locator("#empty_cart")).isVisible();
+        assertThat(getPage().locator("#empty_cart")).containsText("Cart is empty!");
     }
 }

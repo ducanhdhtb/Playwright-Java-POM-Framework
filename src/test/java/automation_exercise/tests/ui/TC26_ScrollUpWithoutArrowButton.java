@@ -22,20 +22,20 @@ public class TC26_ScrollUpWithoutArrowButton extends BaseTest {
     @Step("TC26: Scroll down then scroll up manually (no arrow button)")
     public void testScrollUpWithoutArrowButton() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Scroll down to bottom
-        homePage.scrollToBottom();
+        homePage.get().scrollToBottom();
 
         // 5. Verify SUBSCRIPTION is visible
-        homePage.verifySubscriptionTitleIsVisible();
+        homePage.get().verifySubscriptionTitleIsVisible();
 
         // 6. Scroll up manually (no arrow button)
-        homePage.scrollToTop();
+        homePage.get().scrollToTop();
 
         // 7. Verify page scrolled up — hero text visible
-        page.waitForTimeout(1000);
-        homePage.verifyHeroText("Full-Fledged practice website for Automation Engineers");
+        getPage().waitForTimeout(1000);
+        homePage.get().verifyHeroText("Full-Fledged practice website for Automation Engineers");
     }
 }

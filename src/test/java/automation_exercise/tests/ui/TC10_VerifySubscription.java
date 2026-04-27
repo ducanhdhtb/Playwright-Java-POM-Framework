@@ -19,21 +19,21 @@ public class TC10_VerifySubscription extends BaseTest {
     @Step("TC10: Verify subscription on home page")
     public void verifySubscription(String email) {
         // 1 & 2. Launch browser and Navigate to URL
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Scroll down to footer
-        homePage.scrollToFooter();
+        homePage.get().scrollToFooter();
 
         // 5. Verify text 'SUBSCRIPTION'
-        homePage.verifySubscriptionTitleIsVisible();
+        homePage.get().verifySubscriptionTitleIsVisible();
 
         // 6. Enter email address and click arrow button
-        homePage.subscribe(email);
+        homePage.get().subscribe(email);
 
         // 7. Verify success message is visible
-        homePage.verifySuccessMessage();
+        homePage.get().verifySuccessMessage();
     }
 }

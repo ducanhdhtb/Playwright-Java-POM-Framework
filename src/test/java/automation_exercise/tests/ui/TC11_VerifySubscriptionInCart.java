@@ -20,25 +20,25 @@ public class TC11_VerifySubscriptionInCart extends BaseTest {
     @Step("TC11: Verify subscription on cart page")
     public void verifySubscriptionInCart(String email) {
         // 1 & 2. Launch browser and Navigate to URL
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click 'Cart' button
         // Note: Reusing the existing navigation logic in HomePage or direct click
-        page.click("header .fa-shopping-cart");
+        getPage().click("header .fa-shopping-cart");
 
         // 5. Scroll down to footer
-        cartPage.scrollToFooter();
+        cartPage.get().scrollToFooter();
 
         // 6. Verify text 'SUBSCRIPTION'
-        cartPage.verifySubscriptionTitleIsVisible();
+        cartPage.get().verifySubscriptionTitleIsVisible();
 
         // 7. Enter email address and click arrow button
-        cartPage.subscribe(email);
+        cartPage.get().subscribe(email);
 
         // 8. Verify success message 'You have been successfully subscribed!' is visible
-        cartPage.verifySuccessMessage();
+        cartPage.get().verifySuccessMessage();
     }
 }

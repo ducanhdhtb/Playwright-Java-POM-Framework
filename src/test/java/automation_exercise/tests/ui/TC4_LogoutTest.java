@@ -14,16 +14,16 @@ public class TC4_LogoutTest extends BaseTest {
     @Test(priority = 4, groups = {"regression"})
     @Step("TC4: Logout user")
     public void testLogoutUser() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         createLoggedInUser("\u004e\u0067\u0075\u0079\u1ec5\u006e \u0110\u1ee9c \u0041\u006e\u0068", "ducanh123");
 
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
-        homePage.clickLogout();
+        homePage.get().clickLogout();
 
-        assertThat(page).hasURL("https://automationexercise.com/login");
-        assertThat(page.getByRole(AriaRole.HEADING,
+        assertThat(getPage()).hasURL("https://automationexercise.com/login");
+        assertThat(getPage().getByRole(AriaRole.HEADING,
                 new Page.GetByRoleOptions().setName("Login to your account"))).isVisible();
     }
 }

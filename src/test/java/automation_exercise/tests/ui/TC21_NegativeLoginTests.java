@@ -30,22 +30,22 @@ public class TC21_NegativeLoginTests extends BaseTest {
         String wrongPassword = "WrongPass999";
 
         // Setup via API
-        String email = userApi.setupUser(name, correctPassword);
+        String email = userApi.get().setupUser(name, correctPassword);
 
         try {
-            homePage.navigate(ConfigReader.getProperty("baseUrl"));
-            homePage.clickSignupLogin();
-            signupLoginPage.fillLoginForm(email, wrongPassword);
-            signupLoginPage.clickLoginButton();
+            homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+            homePage.get().clickSignupLogin();
+            signupLoginPage.get().fillLoginForm(email, wrongPassword);
+            signupLoginPage.get().clickLoginButton();
 
             // Verify error message is shown
-            assertThat(page.getByText("Your email or password is incorrect!"))
+            assertThat(getPage().getByText("Your email or password is incorrect!"))
                     .isVisible();
 
             // Verify user is NOT logged in
-            assertThat(page.locator("#header")).not().containsText("Logged in as");
+            assertThat(getPage().locator("#header")).not().containsText("Logged in as");
         } finally {
-            userApi.teardownUser(email, correctPassword);
+            userApi.get().teardownUser(email, correctPassword);
         }
     }
 
@@ -56,15 +56,15 @@ public class TC21_NegativeLoginTests extends BaseTest {
     @Description("Attempts login with an email that was never registered")
     @Step("TC21b: Non-existent email shows error message")
     public void testLoginWithNonExistentEmail() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm(
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm(
                 "ghost_" + System.currentTimeMillis() + "@nowhere.com",
                 "Password123"
         );
-        signupLoginPage.clickLoginButton();
+        signupLoginPage.get().clickLoginButton();
 
-        assertThat(page.getByText("Your email or password is incorrect!"))
+        assertThat(getPage().getByText("Your email or password is incorrect!"))
                 .isVisible();
     }
 
@@ -75,13 +75,13 @@ public class TC21_NegativeLoginTests extends BaseTest {
     @Description("Submits login form with empty email and password fields")
     @Step("TC21c: Empty credentials shows error or stays on login page")
     public void testLoginWithEmptyCredentials() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickSignupLogin();
-        signupLoginPage.fillLoginForm("", "");
-        signupLoginPage.clickLoginButton();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickSignupLogin();
+        signupLoginPage.get().fillLoginForm("", "");
+        signupLoginPage.get().clickLoginButton();
 
         // Should remain on login page (not navigate away)
-        assertThat(page).hasURL(
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*(login|signup).*",
                         java.util.regex.Pattern.CASE_INSENSITIVE));
     }

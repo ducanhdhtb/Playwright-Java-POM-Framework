@@ -22,23 +22,23 @@ public class TC28_AddToCartFromRecommended extends BaseTest {
     @Step("TC28: Add recommended item to cart")
     public void testAddToCartFromRecommended() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Scroll to bottom
-        homePage.scrollToBottom();
+        homePage.get().scrollToBottom();
 
         // 5. Verify RECOMMENDED ITEMS are visible
-        homePage.verifyRecommendedItemsVisible();
+        homePage.get().verifyRecommendedItemsVisible();
 
         // 6. Click Add To Cart on first recommended product
-        homePage.addFirstRecommendedItemToCart();
+        homePage.get().addFirstRecommendedItemToCart();
 
         // 7. Click View Cart
-        productsPage.clickViewCart();
+        productsPage.get().clickViewCart();
 
         // 8. Verify product is in cart
-        assertThat(page).hasURL("https://automationexercise.com/view_cart");
-        cartPage.verifyCartCount(1);
+        assertThat(getPage()).hasURL("https://automationexercise.com/view_cart");
+        cartPage.get().verifyCartCount(1);
     }
 }

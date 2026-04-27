@@ -29,39 +29,39 @@ public class TC6_ContactUsForm extends BaseTest {
                 String expectedSuccessText
         ) {
 	        // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
-	        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+	        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click on 'Contact Us' button
-        homePage.clickContactUs();
+        homePage.get().clickContactUs();
 
         // 5. Verify 'GET IN TOUCH' is visible
-        assertThat(page.getByRole(AriaRole.HEADING,
+        assertThat(getPage().getByRole(AriaRole.HEADING,
                 new Page.GetByRoleOptions().setName("Get In Touch"))).isVisible();
 
 	        // 6. Enter name, email, subject and message from Excel
-	        contactPage.fillContactForm(name, email, subject, message);
+	        contactPage.get().fillContactForm(name, email, subject, message);
 
 	        // 7. Upload file (Đảm bảo đường dẫn file chính xác)
-	        contactPage.uploadFile(Paths.get(uploadFile));
+	        contactPage.get().uploadFile(Paths.get(uploadFile));
 
         // 8 & 9. Click 'Submit' và xử lý 'OK' button
-        contactPage.clickSubmit();
+        contactPage.get().clickSubmit();
 
 	        // 10. Verify success message is visible
-	        contactPage.waitForSuccessMessage(expectedSuccessText);
+	        contactPage.get().waitForSuccessMessage(expectedSuccessText);
 
 	        // 11. Click 'Home' button and verify landing
-	        contactPage.clickHome();
-	        assertThat(page).hasURL("https://automationexercise.com/");
+	        contactPage.get().clickHome();
+	        assertThat(getPage()).hasURL("https://automationexercise.com/");
 	    }
 }
 
 //3. Điểm nhấn kỹ thuật
-// Xử lý Dialog (page.onceDialog): Trong Playwright, bạn phải thiết lập trình lắng nghe (listener) trước khi hành động gây ra dialog xuất hiện (nút Submit). Nếu bạn click trước rồi mới viết code xử lý dialog, bài test sẽ bị treo.
+// Xử lý Dialog (getPage().onceDialog): Trong Playwright, bạn phải thiết lập trình lắng nghe (listener) trước khi hành động gây ra dialog xuất hiện (nút Submit). Nếu bạn click trước rồi mới viết code xử lý dialog, bài test sẽ bị treo.
 //
 // Upload File: Playwright không cần tương tác với cửa sổ chọn file của hệ điều hành. Nó nạp trực tiếp file vào phần tử input[type='file'].
 //
-// Scoping Locator: Ở bước 11, tôi dùng page.locator("#contact-page").getByRole(...) để đảm bảo click đúng nút Home nằm trong vùng nội dung trang liên hệ, tránh nhầm lẫn với các nút Home khác nếu có.
+// Scoping Locator: Ở bước 11, tôi dùng getPage().locator("#contact-page").getByRole(...) để đảm bảo click đúng nút Home nằm trong vùng nội dung trang liên hệ, tránh nhầm lẫn với các nút Home khác nếu có.

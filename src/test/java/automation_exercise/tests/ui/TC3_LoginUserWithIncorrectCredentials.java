@@ -21,24 +21,24 @@ public class TC3_LoginUserWithIncorrectCredentials extends BaseTest {
     @Step("TC3: Login with invalid credentials")
     public void testLoginWithIncorrectCredentials(String email, String password, String expectedError) {
         // 1 & 2. Launch & Navigate
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify home page is visible
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click on 'Signup / Login' button
-        homePage.clickSignupLogin();
+        homePage.get().clickSignupLogin();
 
         // 5. Verify 'Login to your account' is visible
-        assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Login to your account"))).isVisible();
+        assertThat(getPage().getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("Login to your account"))).isVisible();
 
         // 6. Enter incorrect email and password from the data provider
-        signupLoginPage.fillLoginForm(email, password);
+        signupLoginPage.get().fillLoginForm(email, password);
 
         // 7. Click 'login' button
-        signupLoginPage.clickLoginButton();
+        signupLoginPage.get().clickLoginButton();
 
         // 8. Verify the expected error message is visible
-        assertThat(page.getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
+        assertThat(getPage().getByText(expectedError, new Page.GetByTextOptions().setExact(true))).isVisible();
     }
 }

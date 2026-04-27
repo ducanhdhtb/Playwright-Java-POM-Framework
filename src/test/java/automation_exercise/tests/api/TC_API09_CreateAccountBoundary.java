@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.testng.Assert.*;
+import utils.ExcelReader;
 
 /**
  * TC_API09: Create Account API — EP + BVA + Error Guessing
@@ -57,11 +58,23 @@ public class TC_API09_CreateAccountBoundary extends BaseApiTest {
 
     @DataProvider(name = "missingRequiredFields")
     public Object[][] missingRequiredFields() {
-        return new Object[][]{
-                {Map.of("name", ""),     "empty name"},
-                {Map.of("email", ""),    "empty email"},
-                {Map.of("password", ""), "empty password"},
-        };
+        // Excel sheet expected columns: overrides (semicolon-separated key=value pairs), description
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "missingRequiredFields");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String overridesRaw = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            String desc = rows[i].length > 1 && rows[i][1] != null ? rows[i][1].toString() : "";
+            Map<String, String> map = new java.util.LinkedHashMap<>();
+            if (!overridesRaw.isBlank()) {
+                String[] parts = overridesRaw.split(";");
+                for (String part : parts) {
+                    String[] kv = part.split("=", 2);
+                    if (kv.length == 2) map.put(kv[0].trim(), kv[1].trim());
+                }
+            }
+            out[i] = new Object[]{map, desc};
+        }
+        return out;
     }
 
     @Test(
@@ -83,12 +96,7 @@ public class TC_API09_CreateAccountBoundary extends BaseApiTest {
 
     @DataProvider(name = "invalidEmailFormats")
     public Object[][] invalidEmailFormats() {
-        return new Object[][]{
-                {"notanemail"},
-                {"missing@"},
-                {"@nodomain.com"},
-                {"spaces in@email.com"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "invalidEmailFormats");
     }
 
     @Test(
@@ -135,13 +143,7 @@ public class TC_API09_CreateAccountBoundary extends BaseApiTest {
 
     @DataProvider(name = "specialCharNames")
     public Object[][] specialCharNames() {
-        return new Object[][]{
-                {"<script>alert('xss')</script>", "XSS in name"},
-                {"'; DROP TABLE users; --",        "SQL injection in name"},
-                {"Nguyễn Đức Anh",                 "Vietnamese unicode name"},
-                {"John O'Brien",                   "apostrophe in name"},
-                {"María García",                   "accented chars"},
-        };
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "specialCharNames");
     }
 
     @Test(
@@ -170,14 +172,17 @@ public class TC_API09_CreateAccountBoundary extends BaseApiTest {
 
     @DataProvider(name = "titleValues")
     public Object[][] titleValues() {
-        return new Object[][]{
-                {"Mr",    201},  // EP: valid
-                {"Mrs",   201},  // EP: valid
-                {"Miss",  201},  // EP: valid
-                {"Dr",    201},  // EP: may or may not be valid
-                {"",      400},  // EP: empty — likely invalid
-                {"INVALID_TITLE_XYZ", 400}, // EP: invalid value
-        };
+        Object[][] rows = ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "titleValues");
+        Object[][] out = new Object[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String title = rows[i].length > 0 && rows[i][0] != null ? rows[i][0].toString() : "";
+            int code = 0;
+            if (rows[i].length > 1 && rows[i][1] != null) {
+                try { code = Integer.parseInt(rows[i][1].toString()); } catch (NumberFormatException ignored) {}
+            }
+            out[i] = new Object[]{title, code};
+        }
+        return out;
     }
 
     @Test(

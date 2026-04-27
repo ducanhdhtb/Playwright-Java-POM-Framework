@@ -9,6 +9,7 @@ import utils.ConfigReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.testng.Assert.assertTrue;
+import utils.ExcelReader;
 
 /**
  * TC34: Verify each category page displays at least 1 product
@@ -20,15 +21,8 @@ public class TC34_VerifyProductCountPerCategory extends BaseTest {
 
     @DataProvider(name = "categoryData")
     public static Object[][] categoryData() {
-        return new Object[][]{
-                {"/category_products/1", "WOMEN - DRESS PRODUCTS"},
-                {"/category_products/2", "WOMEN - TOPS PRODUCTS"},
-                {"/category_products/3", "MEN - TSHIRTS PRODUCTS"},
-                {"/category_products/4", "KIDS - DRESS PRODUCTS"},
-                {"/category_products/5", "KIDS - TOPS & SHIRTS PRODUCTS"},
-                {"/category_products/6", "MEN - JEANS PRODUCTS"},
-                {"/category_products/7", "WOMEN - SAREE PRODUCTS"},
-        };
+        // Data moved to Excel: sheet name should be 'categoryData'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "categoryData");
     }
 
     @Test(
@@ -41,15 +35,15 @@ public class TC34_VerifyProductCountPerCategory extends BaseTest {
     @Step("TC34: Verify category '{0}' shows title '{1}' with products")
     public void testProductCountPerCategory(String categoryUrl, String expectedTitle) {
         // Navigate directly to category URL
-        homePage.navigate("https://automationexercise.com" + categoryUrl);
+        homePage.get().navigate("https://automationexercise.com" + categoryUrl);
 
         // Verify category title
-        homePage.verifyCategoryPageTitle(expectedTitle);
+        homePage.get().verifyCategoryPageTitle(expectedTitle);
 
         // Verify at least 1 product is displayed
-        assertThat(page.locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".features_items")).isVisible();
 
-        int productCount = page.locator(".single-products").count();
+        int productCount = getPage().locator(".single-products").count();
         assertTrue(productCount > 0,
                 "Category '" + expectedTitle + "' should have at least 1 product, found: " + productCount);
     }

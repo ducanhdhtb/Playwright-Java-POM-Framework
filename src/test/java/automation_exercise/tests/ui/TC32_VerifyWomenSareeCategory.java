@@ -25,21 +25,21 @@ public class TC32_VerifyWomenSareeCategory extends BaseTest {
     @Step("TC32: View Women > Saree category")
     public void testVerifyWomenSareeCategory() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.verifyCategoriesVisible();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().verifyCategoriesVisible();
 
         // 4. Click Women > Saree
-        homePage.selectCategory("a[href='#Women']", "Saree");
+        homePage.get().selectCategory("a[href='#Women']", "Saree");
 
         // 5. Verify category page title
-        homePage.verifyCategoryPageTitle("WOMEN - SAREE PRODUCTS");
+        homePage.get().verifyCategoryPageTitle("WOMEN - SAREE PRODUCTS");
 
         // 6. Verify products are displayed
-        assertThat(page.locator(".features_items")).isVisible();
-        assertThat(page.locator(".single-products").first()).isVisible();
+        assertThat(getPage().locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".single-products").first()).isVisible();
 
         // 7. Verify URL contains category_products/7 (Saree = category 7)
-        assertThat(page).hasURL(
+        assertThat(getPage()).hasURL(
                 java.util.regex.Pattern.compile(".*/category_products/7.*"));
     }
 }

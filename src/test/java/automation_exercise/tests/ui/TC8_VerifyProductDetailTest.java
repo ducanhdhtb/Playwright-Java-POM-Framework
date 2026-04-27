@@ -14,34 +14,34 @@ public class TC8_VerifyProductDetailTest extends BaseTest {
     @Step("TC8: Verify product detail page")
     public void testVerifyAllProductsAndDetail() {
         // 1 & 2. Khởi tạo và điều hướng (Xử lý bởi BaseTest)
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
         // 3. Verify that home page is visible successfully
-        assertThat(page).hasTitle("Automation Exercise");
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click on 'Products' button
-        homePage.clickProducts();
+        homePage.get().clickProducts();
 
         // 5. Verify user is navigated to ALL PRODUCTS page successfully
-        assertThat(page).hasURL("https://automationexercise.com/products");
-        assertThat(page.getByRole(AriaRole.HEADING,
+        assertThat(getPage()).hasURL("https://automationexercise.com/products");
+        assertThat(getPage().getByRole(AriaRole.HEADING,
                 new com.microsoft.playwright.Page.GetByRoleOptions().setName("All Products").setExact(true))).isVisible();
 
         // 6. The products list is visible
-        assertThat(page.locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".features_items")).isVisible();
 
         // 7. Click on 'View Product' of first product
-        productsPage.clickViewProductOfFirstItem();
+        productsPage.get().clickViewProductOfFirstItem();
 
         // 8. User is landed to product detail page
-        assertThat(page).hasURL(java.util.regex.Pattern.compile(".*/product_details/.*"));
+        assertThat(getPage()).hasURL(java.util.regex.Pattern.compile(".*/product_details/.*"));
 
         // 9. Verify that detail is visible
-        assertThat(productDetailPage.productName()).isVisible();
-        assertThat(productDetailPage.category()).isVisible();
-        assertThat(productDetailPage.price()).isVisible();
-        assertThat(productDetailPage.availability()).isVisible();
-        assertThat(productDetailPage.condition()).isVisible();
-        assertThat(productDetailPage.brand()).isVisible();
+        assertThat(productDetailPage.get().productName()).isVisible();
+        assertThat(productDetailPage.get().category()).isVisible();
+        assertThat(productDetailPage.get().price()).isVisible();
+        assertThat(productDetailPage.get().availability()).isVisible();
+        assertThat(productDetailPage.get().condition()).isVisible();
+        assertThat(productDetailPage.get().brand()).isVisible();
     }
 }

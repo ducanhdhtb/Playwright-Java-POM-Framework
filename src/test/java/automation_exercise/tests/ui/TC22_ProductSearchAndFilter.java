@@ -6,6 +6,7 @@ import io.qameta.allure.Step;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import utils.ConfigReader;
+import utils.ExcelReader;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -21,11 +22,8 @@ public class TC22_ProductSearchAndFilter extends BaseTest {
 
     @DataProvider(name = "searchKeywords")
     public static Object[][] searchKeywords() {
-        return new Object[][]{
-                {"top"},
-                {"dress"},
-                {"jeans"},
-        };
+        // Data moved to Excel: sheet name should be 'searchKeywords'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "searchKeywords");
     }
 
     @Test(
@@ -36,20 +34,20 @@ public class TC22_ProductSearchAndFilter extends BaseTest {
     @Description("Searches for a keyword and verifies all results contain that keyword")
     @Step("TC22a: Search for '{0}' returns matching products")
     public void testSearchReturnsMatchingResults(String keyword) {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
-        productsPage.searchProduct(keyword);
+        productsPage.get().searchProduct(keyword);
 
         // Verify search results heading
-        assertThat(page.locator("h2.title.text-center"))
+        assertThat(getPage().locator("h2.title.text-center"))
                 .containsText("Searched Products");
 
         // Verify at least one product is shown
-        assertThat(page.locator(".productinfo").first()).isVisible();
+        assertThat(getPage().locator(".productinfo").first()).isVisible();
 
         // Verify all product names contain the keyword
-        productsPage.verifyAllProductNamesContain(keyword);
+        productsPage.get().verifyAllProductNamesContain(keyword);
     }
 
     @Test(
@@ -59,17 +57,17 @@ public class TC22_ProductSearchAndFilter extends BaseTest {
     @Description("Searches for a nonsense keyword and verifies no products are shown")
     @Step("TC22b: Search with no results shows empty state")
     public void testSearchWithNoResults() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
-        productsPage.searchProduct("xyzzy_no_such_product_12345");
+        productsPage.get().searchProduct("xyzzy_no_such_product_12345");
 
         // Verify searched products section is shown
-        assertThat(page.locator("h2.title.text-center"))
+        assertThat(getPage().locator("h2.title.text-center"))
                 .containsText("Searched Products");
 
         // Verify no product cards are visible
-        assertThat(page.locator(".productinfo")).hasCount(0);
+        assertThat(getPage().locator(".productinfo")).hasCount(0);
     }
 
     @Test(
@@ -79,13 +77,13 @@ public class TC22_ProductSearchAndFilter extends BaseTest {
     @Description("Clicks Women > Dress category and verifies the category page loads")
     @Step("TC22c: Category filter Women > Dress")
     public void testCategoryFilterWomenDress() {
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
 
-        homePage.verifyCategoriesVisible();
-        homePage.selectCategory("a[href='#Women']", "Dress");
+        homePage.get().verifyCategoriesVisible();
+        homePage.get().selectCategory("a[href='#Women']", "Dress");
 
         // Verify category page title
-        homePage.verifyCategoryPageTitle("Women - Dress Products");
-        assertThat(page.locator(".features_items").first()).isVisible();
+        homePage.get().verifyCategoryPageTitle("Women - Dress Products");
+        assertThat(getPage().locator(".features_items").first()).isVisible();
     }
 }

@@ -33,52 +33,52 @@ public class TC29_VerifyAddressInCheckout extends BaseTest {
     @Step("TC29: Verify address details in checkout page")
     public void testVerifyAddressInCheckout() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click Signup / Login
-        homePage.clickSignupLogin();
+        homePage.get().clickSignupLogin();
 
         // 5. Fill signup and create account
         String email = "addr_" + System.currentTimeMillis() + "@test.com";
-        signupLoginPage.fillSignupForm(FIRST_NAME, email);
-        signupLoginPage.clickSignupButton();
-        accountPage.fillAccountDetails(PASSWORD, "10", "July", "1990");
-        accountPage.fillAddressDetails(
+        signupLoginPage.get().fillSignupForm(FIRST_NAME, email);
+        signupLoginPage.get().clickSignupButton();
+        accountPage.get().fillAccountDetails(PASSWORD, "10", "July", "1990");
+        accountPage.get().fillAddressDetails(
                 FIRST_NAME, LAST_NAME, COMPANY, ADDRESS,
                 COUNTRY, STATE, CITY, ZIPCODE, MOBILE
         );
-        accountPage.clickCreateAccount();
+        accountPage.get().clickCreateAccount();
 
         // 6. Verify account created and continue
-        assertThat(page.getByText("Account Created!")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        assertThat(getPage().getByText("Account Created!")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
 
         // 7. Verify logged in
-        homePage.verifyLoggedInAs(FIRST_NAME);
+        homePage.get().verifyLoggedInAs(FIRST_NAME);
 
         // 8. Add product to cart
-        homePage.clickProducts();
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        homePage.get().clickProducts();
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // 9. Verify cart page
-        assertThat(page).hasURL("https://automationexercise.com/view_cart");
+        assertThat(getPage()).hasURL("https://automationexercise.com/view_cart");
 
         // 10. Proceed to checkout
-        cartPage.proceedToCheckout();
+        cartPage.get().proceedToCheckout();
 
         // 11. Verify delivery address contains registration data
-        checkoutPage.verifyDeliveryAddress(FIRST_NAME);
-        checkoutPage.verifyDeliveryAddress(ADDRESS);
+        checkoutPage.get().verifyDeliveryAddress(FIRST_NAME);
+        checkoutPage.get().verifyDeliveryAddress(ADDRESS);
 
         // 12. Verify billing address contains registration data
-        checkoutPage.verifyBillingAddress(FIRST_NAME);
-        checkoutPage.verifyBillingAddress(ADDRESS);
+        checkoutPage.get().verifyBillingAddress(FIRST_NAME);
+        checkoutPage.get().verifyBillingAddress(ADDRESS);
 
         // 13. Cleanup
-        homePage.deleteAccount();
-        assertThat(page.getByText("Account Deleted!")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        homePage.get().deleteAccount();
+        assertThat(getPage().getByText("Account Deleted!")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
     }
 }

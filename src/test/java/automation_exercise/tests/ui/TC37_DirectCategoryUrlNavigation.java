@@ -7,6 +7,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import utils.ExcelReader;
 
 /**
  * TC37: Verify direct URL navigation to all category pages
@@ -19,15 +20,8 @@ public class TC37_DirectCategoryUrlNavigation extends BaseTest {
 
     @DataProvider(name = "categoryUrls")
     public static Object[][] categoryUrls() {
-        return new Object[][]{
-                {"/category_products/1", "WOMEN - DRESS PRODUCTS",   "Women"},
-                {"/category_products/2", "WOMEN - TOPS PRODUCTS",    "Women"},
-                {"/category_products/3", "MEN - TSHIRTS PRODUCTS",   "Men"},
-                {"/category_products/4", "KIDS - DRESS PRODUCTS",    "Kids"},
-                {"/category_products/5", "KIDS - TOPS & SHIRTS PRODUCTS", "Kids"},
-                {"/category_products/6", "MEN - JEANS PRODUCTS",     "Men"},
-                {"/category_products/7", "WOMEN - SAREE PRODUCTS",   "Women"},
-        };
+        // Data moved to Excel: sheet name should be 'categoryUrls'
+        return ExcelReader.getTestData("src/test/resources/AutomationTestData.xlsx", "categoryUrls");
     }
 
     @Test(
@@ -42,21 +36,21 @@ public class TC37_DirectCategoryUrlNavigation extends BaseTest {
         String url = "https://automationexercise.com" + path;
 
         // Navigate directly via URL (no sidebar interaction)
-        homePage.navigate(url);
+        homePage.get().navigate(url);
 
         // Verify correct URL
-        assertThat(page).hasURL(url);
+        assertThat(getPage()).hasURL(url);
 
         // Verify category title
-        homePage.verifyCategoryPageTitle(expectedTitle);
+        homePage.get().verifyCategoryPageTitle(expectedTitle);
 
         // Verify products list is visible
-        assertThat(page.locator(".features_items")).isVisible();
+        assertThat(getPage().locator(".features_items")).isVisible();
 
         // Verify sidebar still shows categories (navigation intact)
-        homePage.verifyCategoriesVisible();
+        homePage.get().verifyCategoriesVisible();
 
         // Verify parent category is highlighted/visible in sidebar
-        assertThat(page.locator(".left-sidebar")).containsText(parentCategory);
+        assertThat(getPage().locator(".left-sidebar")).containsText(parentCategory);
     }
 }

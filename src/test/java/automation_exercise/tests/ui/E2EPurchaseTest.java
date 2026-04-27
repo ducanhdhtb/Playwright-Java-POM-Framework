@@ -26,50 +26,50 @@ public class E2EPurchaseTest extends BaseTest {
             String cardName, String cardNumber, String cvc, String expMonth, String expYear
     ) {
         // 1. Navigate to URL and go to the products page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        homePage.clickProducts();
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        homePage.get().clickProducts();
 
         // 2. Search for a product, add it to the cart, and view the cart
-        productsPage.searchProduct(searchKey);
-        productsPage.addFirstProductToCart();
-        productsPage.clickViewCart();
+        productsPage.get().searchProduct(searchKey);
+        productsPage.get().addFirstProductToCart();
+        productsPage.get().clickViewCart();
 
         // 3. Proceed to checkout and click the 'Register / Login' button
-        cartPage.proceedToCheckout();
-        cartPage.clickRegisterLoginOnModal();
+        cartPage.get().proceedToCheckout();
+        cartPage.get().clickRegisterLoginOnModal();
 
         // 4. Register a new user with random email
-        signupLoginPage.fillSignupDetailsWithRandomEmail(username);
-        signupLoginPage.fillAccountInformation(password, day, month, year);
-        signupLoginPage.fillAddressDetails(username, lastName, address, state, city, zipcode, mobile);
-        signupLoginPage.clickCreateAccount();
+        signupLoginPage.get().fillSignupDetailsWithRandomEmail(username);
+        signupLoginPage.get().fillAccountInformation(password, day, month, year);
+        signupLoginPage.get().fillAddressDetails(username, lastName, address, state, city, zipcode, mobile);
+        signupLoginPage.get().clickCreateAccount();
 
         // 5. Verify account creation and continue
-        assertThat(page.locator("h2:has-text('Account Created!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        assertThat(getPage().locator("h2:has-text('Account Created!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
 
         // 6. Verify that the user is logged in
-        homePage.verifyLoggedInAs(username);
+        homePage.get().verifyLoggedInAs(username);
 
         // 7. Go back to the cart and proceed to checkout again
-        homePage.clickCart();
-        cartPage.proceedToCheckout();
+        homePage.get().clickCart();
+        cartPage.get().proceedToCheckout();
 
         // 8. Verify address details are correct and place the order
-        assertThat(page.locator("#address_delivery")).isVisible(); // Verify address section is visible
-        checkoutPage.enterComment(comment);
-        checkoutPage.clickPlaceOrder();
+        assertThat(getPage().locator("#address_delivery")).isVisible(); // Verify address section is visible
+        checkoutPage.get().enterComment(comment);
+        checkoutPage.get().clickPlaceOrder();
 
         // 9. Enter payment details and confirm the order
-        checkoutPage.enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
-        checkoutPage.clickPayAndConfirm();
+        checkoutPage.get().enterPaymentDetails(cardName, cardNumber, cvc, expMonth, expYear);
+        checkoutPage.get().clickPayAndConfirm();
 
         // 10. Verify the order success message
-        checkoutPage.verifyOrderSuccess();
+        checkoutPage.get().verifyOrderSuccess();
 
         // 11. Clean up by deleting the newly created account
-        homePage.deleteAccount();
-        assertThat(page.locator("h2:has-text('Account Deleted!')")).isVisible();
-        page.click("a[data-qa='continue-button']");
+        homePage.get().deleteAccount();
+        assertThat(getPage().locator("h2:has-text('Account Deleted!')")).isVisible();
+        getPage().click("a[data-qa='continue-button']");
     }
 }

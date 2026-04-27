@@ -22,30 +22,30 @@ public class TC27_AddReviewOnProduct extends BaseTest {
     @Step("TC27: Add review on product")
     public void testAddReviewOnProduct() {
         // 1-3. Navigate and verify home page
-        homePage.navigate(ConfigReader.getProperty("baseUrl"));
-        assertThat(page).hasTitle("Automation Exercise");
+        homePage.get().navigate(ConfigReader.getProperty("baseUrl"));
+        assertThat(getPage()).hasTitle("Automation Exercise");
 
         // 4. Click Products
-        homePage.clickProducts();
+        homePage.get().clickProducts();
 
         // 5. Click View Product for first item
-        productsPage.clickViewProductOfFirstItem();
+        productsPage.get().clickViewProductOfFirstItem();
 
         // 6. Verify 'Write Your Review' is visible
-        assertThat(page.locator("#review-form")).isVisible();
-        assertThat(page.getByText("Write Your Review")).isVisible();
+        assertThat(getPage().locator("#review-form")).isVisible();
+        assertThat(getPage().getByText("Write Your Review")).isVisible();
 
         // 7. Enter name, email and review
-        productDetailPage.writeReview(
+        productDetailPage.get().writeReview(
                 "TestReviewer",
                 "reviewer_" + System.currentTimeMillis() + "@test.com",
                 "Great product! Highly recommended for automation testing."
         );
 
         // 8. Click Submit button
-        productDetailPage.submitReview();
+        productDetailPage.get().submitReview();
 
         // 9. Verify success message
-        productDetailPage.verifyReviewSuccess();
+        productDetailPage.get().verifyReviewSuccess();
     }
 }
